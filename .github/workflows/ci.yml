@@ -12,7 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build M0 image
-        run: docker build --tag amiga-dev:m0 .
-      - name: Run M0 smoke test
-        run: docker run --rm amiga-dev:m0 amiga-dev-smoke
+      - name: Build amiga-dev image
+        run: docker build --tag amiga-dev:m1 .
+      - name: Run baseline smoke test
+        run: docker run --rm amiga-dev:m1 amiga-dev-smoke
+      - name: Report toolchain
+        run: docker run --rm amiga-dev:m1 amiga-toolchain-info
+      - name: Compile minimal 68000 executable
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            amiga-dev:m1 \
+            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror \
+              tests/hello.c -o /tmp/hello-amiga
+      - name: Verify compiler target
+        run: docker run --rm amiga-dev:m1 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
