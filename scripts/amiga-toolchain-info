@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+printf '%s\n' 'amiga-dev toolchain'
+printf 'prefix: %s\n' "${AMIGA_PREFIX:-/opt/amiga}"
+m68k-amigaos-gcc --version | head -n 1
+m68k-amigaos-ld --version | head -n 1
+m68k-amigaos-as --version | head -n 1
