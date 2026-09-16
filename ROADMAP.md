@@ -16,11 +16,18 @@ M0 success criterion: the repository can build an OCI image and its baseline smo
 
 ## M1 — Bebbo/amiga-gcc toolchain
 
-- reproducibly install/pin Bebbo's Amiga GCC toolchain
+Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+
+- build Bebbo's Amiga GCC toolchain in a dedicated OCI build stage
 - expose `m68k-amigaos-*` tools through PATH
-- compile and link a minimal 68000 Amiga executable
-- record compiler/binutils versions
-- add toolchain qualification checks
+- compile and link a minimal `-m68000` Amiga executable
+- report compiler, assembler and linker versions
+- verify the compiler target is `m68k-amigaos`
+- keep proprietary Amiga material outside the image
+
+M1 is complete only after the GitHub Actions container build and all toolchain qualification probes pass.
+
+Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qualified upstream revision. A floating upstream ref is acceptable during bring-up but must be replaced by an immutable qualified revision before a stable image release.
 
 ## M2 — Amiga development utilities
 
