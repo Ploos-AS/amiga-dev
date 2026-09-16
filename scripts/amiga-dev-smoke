@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+printf '%s\n' 'amiga-dev M0 smoke test'
+
+for tool in cc make cmake ninja git python3 file jq; do
+    command -v "$tool" >/dev/null 2>&1 || {
+        echo "missing required host tool: $tool" >&2
+        exit 1
+    }
+done
+
+[ -d "${AMIGA_PREFIX:-/opt/amiga}" ] || {
+    echo 'AMIGA_PREFIX does not exist' >&2
+    exit 1
+}
+
+if command -v m68k-amigaos-gcc >/dev/null 2>&1; then
+    echo 'Bebbo/amiga-gcc: present'
+    m68k-amigaos-gcc --version | head -n 1
+else
+    echo 'Bebbo/amiga-gcc: not installed (expected for M0; M1 scope)'
+fi
+
+echo 'M0 smoke: PASS'
