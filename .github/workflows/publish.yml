@@ -48,5 +48,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=amiga-dev-full
-          cache-to: type=gha,mode=max,scope=amiga-dev-full
+          cache-from: |
+            type=gha,scope=amiga-dev-full
+            type=registry,ref=ghcr.io/ploos-as/amiga-dev:buildcache
+          cache-to: |
+            type=gha,mode=max,scope=amiga-dev-full
+            type=registry,ref=ghcr.io/ploos-as/amiga-dev:buildcache,mode=max
