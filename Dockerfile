@@ -28,11 +28,13 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
 FROM debian:bookworm-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG AMITOOLS_VERSION=0.8.1
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      build-essential ca-certificates cmake curl file git jq make ninja-build \
-      pkg-config python3 python3-pip python3-venv rsync unzip wget xz-utils zip \
- && rm -rf /var/lib/apt/lists/*
+      binutils build-essential ca-certificates cmake curl file git jq make ninja-build \
+      pkg-config python3 python3-pip python3-venv rsync unzip vim-common wget xz-utils zip \
+ && rm -rf /var/lib/apt/lists/* \
+ && python3 -m pip install --no-cache-dir --break-system-packages "amitools==${AMITOOLS_VERSION}"
 
 COPY --from=toolchain /opt/amiga /opt/amiga
 
