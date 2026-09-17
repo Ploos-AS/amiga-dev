@@ -16,16 +16,19 @@ M0 success criterion: the repository can build an OCI image and its baseline smo
 
 ## M1 — Bebbo/amiga-gcc toolchain
 
-Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+Status: **QUALIFIED**
 
-- build Bebbo's Amiga GCC toolchain in a dedicated OCI build stage
+- build Bebbo's full Amiga GCC toolchain (`make all`) in a dedicated OCI build stage
 - expose `m68k-amigaos-*` tools through PATH
 - compile and link a minimal `-m68000` Amiga executable
 - report compiler, assembler and linker versions
 - verify the compiler target is `m68k-amigaos`
 - keep proprietary Amiga material outside the image
+- cache expensive OCI/BuildKit layers in CI without changing the portable container contract
 
-M1 is complete only after the GitHub Actions container build and all toolchain qualification probes pass.
+Qualification evidence: GitHub Actions CI run #18 (`35215431305`) completed successfully on 2026-09-17 for commit `34bf552e4ec1ea586195c7b1acaa0d0239cb104c`. The full image build, baseline smoke test, toolchain report, minimal 68000 compile/link probe and compiler-target verification all passed.
+
+Caching policy: the full Bebbo build is intentionally retained. CI should reuse BuildKit layers whenever the Dockerfile/toolchain inputs are unchanged. GitHub may use its native BuildKit cache backend as provider-specific glue; Forgejo/local builds remain free to use a registry or local BuildKit cache. Consumer projects should ultimately consume a qualified prebuilt `amiga-dev` image instead of rebuilding the toolchain for every project run.
 
 Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qualified upstream revision. A floating upstream ref is acceptable during bring-up but must be replaced by an immutable qualified revision before a stable image release.
 
@@ -58,6 +61,7 @@ Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qual
 - GHCR integration
 - reusable GitHub Actions examples
 - consumer-project qualification
+- registry-backed BuildKit cache usable by Forgejo/self-hosted runners
 
 ## M6 — Reproducibility and qualification
 
