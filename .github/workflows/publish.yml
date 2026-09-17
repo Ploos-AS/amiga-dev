@@ -66,3 +66,28 @@ jobs:
           subject-name: ghcr.io/ploos-as/amiga-dev
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      - name: Verify GitHub build-provenance attestation
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          gh attestation verify "oci://ghcr.io/ploos-as/amiga-dev@${IMAGE_DIGEST}" \
+            --repo "${GITHUB_REPOSITORY}"
+
+      - name: Verify OCI SBOM and provenance attestations
+        env:
+          IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          docker buildx imagetools inspect \
+            "ghcr.io/ploos-as/amiga-dev@${IMAGE_DIGEST}" \
+            --format '{{ json .Provenance }}' > /tmp/provenance.json
+          docker buildx imagetools inspect \
+            "ghcr.io/ploos-as/amiga-dev@${IMAGE_DIGEST}" \
+            --format '{{ json .SBOM }}' > /tmp/sbom.json
+          test -s /tmp/provenance.json
+          test -s /tmp/sbom.json
+          test "$(cat /tmp/provenance.json)" != "null"
+          test "$(cat /tmp/sbom.json)" != "null"
+          jq -e . /tmp/provenance.json >/dev/null
+          jq -e . /tmp/sbom.json >/dev/null
