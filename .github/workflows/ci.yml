@@ -16,6 +16,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify M8.1 consumer contract
+        run: |
+          jq -e '
+            .schema == 1 and
+            .name == "ploos-amiga-dev-consumer" and
+            .image == "ghcr.io/ploos-as/amiga-dev" and
+            .reproducible_reference == "digest-or-sha-tag" and
+            .default_cpu_profile == "68000" and
+            .cpu_profiles == ["68000", "68020", "68030", "68040", "68060"] and
+            .target == "m68k-amigaos" and
+            .commands.build == "amiga-build" and
+            .commands.check == "amiga-check" and
+            .commands.test == "amiga-test" and
+            .commands.inspect == "amiga-inspect" and
+            .commands.package == "amiga-package" and
+            .commands.toolchain_info == "amiga-toolchain-info" and
+            .runtime_qualification.delegated_to == "Ploos-AS/amiga-runtime" and
+            .runtime_qualification.required_for_runtime_claims == true and
+            .ci.github_actions == true and
+            .ci.forgejo_actions == true and
+            .ci.provider_neutral_oci_contract == true and
+            .redistribution.proprietary_kickstart == false and
+            .redistribution.proprietary_workbench == false and
+            .redistribution.commercial_amigaos == false and
+            .redistribution.license_keys == false
+          ' consumer-contract.json >/dev/null
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build amiga-dev image with cache
