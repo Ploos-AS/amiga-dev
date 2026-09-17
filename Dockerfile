@@ -44,9 +44,16 @@ RUN useradd --create-home --uid 10001 --shell /bin/bash amiga \
 
 COPY scripts/amiga-dev-smoke /usr/local/bin/amiga-dev-smoke
 COPY scripts/amiga-toolchain-info /usr/local/bin/amiga-toolchain-info
-RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-info
+COPY scripts/amiga-build /usr/local/bin/amiga-build
+COPY scripts/amiga-check /usr/local/bin/amiga-check
+COPY scripts/amiga-test /usr/local/bin/amiga-test
+COPY scripts/amiga-inspect /usr/local/bin/amiga-inspect
+RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-info \
+      /usr/local/bin/amiga-build /usr/local/bin/amiga-check \
+      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect
 
 ENV AMIGA_PREFIX=/opt/amiga
+ENV AMIGA_CPU_PROFILE=68000
 ENV PATH="/opt/amiga/bin:${PATH}"
 WORKDIR /workspace
 USER amiga
