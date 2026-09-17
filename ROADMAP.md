@@ -79,11 +79,18 @@ M4 packaging operates only on caller-provided redistributable staging trees; it 
 
 ## M5 — CI integration
 
+Status: **IN PROGRESS — M5.1 GHCR PUBLISHING IMPLEMENTED**
+
 - publish versioned OCI images
-- GHCR integration
+- GHCR integration: `ghcr.io/ploos-as/amiga-dev`
+- default-branch pushes publish `edge` plus immutable `sha-*` tags
+- `v*` tags publish semantic-version tags
+- publishing reuses the qualified BuildKit cache and uses only the repository-scoped `GITHUB_TOKEN`
 - reusable GitHub Actions examples
 - consumer-project qualification
 - registry-backed BuildKit cache usable by Forgejo/self-hosted runners
+
+M5.1 qualification requires a successful publish workflow and a pull/smoke test of the resulting GHCR image before it is marked qualified.
 
 ## M6 — Reproducibility and qualification
 
