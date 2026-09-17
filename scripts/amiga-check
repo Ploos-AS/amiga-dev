@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+amiga-dev-smoke
+m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos >/dev/null
+command -v vasmm68k_mot >/dev/null
+command -v hunktool >/dev/null
+command -v xdftool >/dev/null
+
+echo "amiga-check: PASS"
