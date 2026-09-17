@@ -2,6 +2,7 @@ FROM debian:bookworm-slim AS toolchain
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AMIGA_GCC_REPO=https://franke.ms/git/bebbo/amiga-gcc
+ARG AMIGA_GCC_REF=master
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -13,7 +14,21 @@ RUN apt-get update \
 WORKDIR /tmp
 RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
+ && git checkout --detach "${AMIGA_GCC_REF}" \
  && make update \
+ && mkdir -p /opt/amiga/share/amiga-dev \
+ && { \
+      printf 'schema=1\n'; \
+      printf 'amiga_gcc_repo=%s\n' "${AMIGA_GCC_REPO}"; \
+      printf 'amiga_gcc_requested_ref=%s\n' "${AMIGA_GCC_REF}"; \
+      printf 'amiga_gcc_commit=%s\n' "$(git rev-parse HEAD)"; \
+      find . -type d -name .git -print | sort | while IFS= read -r gitdir; do \
+        repo="${gitdir%/.git}"; \
+        commit="$(git -C "${repo}" rev-parse HEAD)"; \
+        origin="$(git -C "${repo}" config --get remote.origin.url || true)"; \
+        printf 'repo=%s\tcommit=%s\torigin=%s\n' "${repo#./}" "${commit}" "${origin}"; \
+      done; \
+    } > /opt/amiga/share/amiga-dev/toolchain.manifest \
  && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
  && test -n "${SDL_TIMER_FILE}" \
  && grep -Eq '^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;' "${SDL_TIMER_FILE}" \
@@ -55,6 +70,7 @@ RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-inf
 
 ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
+ENV AMIGA_TOOLCHAIN_MANIFEST=/opt/amiga/share/amiga-dev/toolchain.manifest
 ENV PATH="/opt/amiga/bin:${PATH}"
 WORKDIR /workspace
 USER amiga
