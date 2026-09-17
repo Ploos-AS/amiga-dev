@@ -133,7 +133,7 @@ M6 stable-release rule: a stable image must not depend on an unrecorded floating
 
 ## M7 — Supply-chain and release hardening
 
-Status: **IN PROGRESS — M7.1 STARTED**
+Status: **IN PROGRESS — M7.1 QUALIFIED, M7.2 STARTED**
 
 - M7.1 publish OCI SBOM and build provenance alongside each published image
 - M7.1 attach GitHub artifact attestation to the exact published image digest
@@ -142,7 +142,11 @@ Status: **IN PROGRESS — M7.1 STARTED**
 - M7.4 verify published attestations and SBOM as part of release qualification
 - M7.5 document stable release promotion and rollback procedure
 
-M7.1 enables BuildKit SBOM generation and maximum provenance for the GHCR publication build. The publish workflow captures the pushed image digest and uses GitHub's build-provenance attestation flow with OIDC, binding the attestation to `ghcr.io/ploos-as/amiga-dev` at that exact digest. M7.1 remains pending until the updated publish workflow completes successfully.
+M7.1 enables BuildKit SBOM generation and maximum provenance for the GHCR publication build. The publish workflow captures the pushed image digest and uses GitHub's build-provenance attestation flow with OIDC, binding the attestation to `ghcr.io/ploos-as/amiga-dev` at that exact digest.
+
+M7.1 qualification evidence: Publish OCI image run #32 (`35255239252`) completed successfully on 2026-09-17 for commit `2d2af28fc7a94a1ce93ca83b3f32aac176ee35d0`, job `105317212418`. The OCI build/publish step and the digest-bound `Attest published image` step both passed. CI run #73 (`35255239247`) also passed the complete existing regression suite for the same commit.
+
+M7.2 pins both Dockerfile stages to the official dated Debian `bookworm-20260824-slim` OCI index digest `sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171`. `docs/BASE_IMAGE.md` defines the controlled refresh and requalification procedure. The digest is authoritative; the dated tag is retained for readability. M7.2 remains pending until the complete CI and publication/attestation workflows pass with the pinned base.
 
 M7 portability rule: SBOM and OCI provenance are image-level standards and remain useful to Forgejo/self-hosted consumers. GitHub's hosted attestation service is additional publication metadata, not a requirement for building or consuming the image outside GitHub.
 
