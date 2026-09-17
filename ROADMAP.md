@@ -49,7 +49,7 @@ M2 intentionally does not install or embed proprietary Kickstart ROMs, Workbench
 
 ## M3 — Unified developer commands
 
-Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+Status: **QUALIFIED**
 
 - `amiga-build` provides a common build entry point and exports CPU-profile flags
 - `amiga-check` validates the container/toolchain contract
@@ -57,6 +57,8 @@ Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
 - `amiga-inspect` combines host file identification, Hunk inspection and a bounded hex preview
 - CPU profiles begin with the portable `68000` baseline (`AMIGA_CPU_PROFILE=68000`, `AMIGA_CPU_FLAGS=-m68000`)
 - CI qualifies the command inventory and uses `amiga-build` plus `amiga-inspect` on a real cross-compiled executable
+
+Qualification evidence: GitHub Actions CI run #35 (`35225214509`) completed successfully on 2026-09-17 for commit `6aa30e72c7d5b87746b8d5fab9cd2c6fb1740cd9`. The full M1/M2 regression suite passed together with the M3 command inventory and the real 68000 `amiga-build`/`amiga-inspect` qualification probe.
 
 ## M4 — Packaging
 
