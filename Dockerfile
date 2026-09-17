@@ -25,18 +25,6 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
       test "$(git -C "${repo}" rev-parse HEAD)" = "${commit}"; \
     done < /tmp/bebbo.lock \
  && mkdir -p /opt/amiga/share/amiga-dev \
- && { \
-      printf 'schema=1\n'; \
-      printf 'amiga_gcc_repo=%s\n' "${AMIGA_GCC_REPO}"; \
-      printf 'amiga_gcc_requested_ref=%s\n' "${AMIGA_GCC_REF}"; \
-      printf 'amiga_gcc_commit=%s\n' "$(git rev-parse HEAD)"; \
-      find . -type d -name .git -print | sort | while IFS= read -r gitdir; do \
-        repo="${gitdir%/.git}"; \
-        commit="$(git -C "${repo}" rev-parse HEAD)"; \
-        origin="$(git -C "${repo}" config --get remote.origin.url || true)"; \
-        printf 'repo=%s\tcommit=%s\torigin=%s\n' "${repo#./}" "${commit}" "${origin}"; \
-      done; \
-    } > /opt/amiga/share/amiga-dev/toolchain.manifest \
  && cp /tmp/bebbo.lock /opt/amiga/share/amiga-dev/bebbo.lock \
  && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
  && test -n "${SDL_TIMER_FILE}" \
@@ -47,7 +35,26 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && test "$(grep -c -- '-not -name __vwfprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 1 \
  && test "$(grep -c -- '-not -name __vfwprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 0 \
  && sed -i 's/__vwfprintf_total_size\.o/__vfwprintf_total_size.o/' "${LIBNIX_PREPLIB}" \
- && make -j"$(nproc)" all PREFIX=/opt/amiga
+ && make -j"$(nproc)" all PREFIX=/opt/amiga \
+ && { \
+      printf 'schema=2\n'; \
+      printf 'amiga_gcc_repo=%s\n' "${AMIGA_GCC_REPO}"; \
+      printf 'amiga_gcc_requested_ref=%s\n' "${AMIGA_GCC_REF}"; \
+      printf 'amiga_gcc_commit=%s\n' "$(git rev-parse HEAD)"; \
+      find . -type d -name .git -print | sort | while IFS= read -r gitdir; do \
+        repo="${gitdir%/.git}"; \
+        commit="$(git -C "${repo}" rev-parse HEAD)"; \
+        origin="$(git -C "${repo}" config --get remote.origin.url || true)"; \
+        printf 'repo=%s\tcommit=%s\torigin=%s\n' "${repo#./}" "${commit}" "${origin}"; \
+      done; \
+    } > /opt/amiga/share/amiga-dev/toolchain.manifest \
+ && { \
+      printf 'schema=1\n'; \
+      find . -type f \( -name '*.lha' -o -name '*.tar.gz' -o -name '*.tar.xz' -o -name '*.tgz' -o -name '*.zip' \) -print | sort | while IFS= read -r input; do \
+        set -- $(sha256sum "${input}"); \
+        printf 'file=%s\tsha256=%s\n' "${input#./}" "$1"; \
+      done; \
+    } > /opt/amiga/share/amiga-dev/build-inputs.manifest
 
 FROM debian:bookworm-slim
 
@@ -80,6 +87,7 @@ RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-inf
 ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
 ENV AMIGA_TOOLCHAIN_MANIFEST=/opt/amiga/share/amiga-dev/toolchain.manifest
+ENV AMIGA_BUILD_INPUTS_MANIFEST=/opt/amiga/share/amiga-dev/build-inputs.manifest
 ENV PATH="/opt/amiga/bin:${PATH}"
 WORKDIR /workspace
 USER amiga
