@@ -133,7 +133,7 @@ M6 stable-release rule: a stable image must not depend on an unrecorded floating
 
 ## M7 — Supply-chain and release hardening
 
-Status: **IN PROGRESS — M7.1–M7.4 QUALIFIED, M7.5 STARTED**
+Status: **QUALIFIED**
 
 - M7.1 publish OCI SBOM and build provenance alongside each published image
 - M7.1 attach GitHub artifact attestation to the exact published image digest
@@ -158,9 +158,23 @@ M7.4 verifies the exact published digest after publication: the GitHub build-pro
 
 M7.4 qualification evidence: GitHub Actions CI run #80 (`35262550842`), job `105341612844`, and Publish OCI image run #39 (`35262550891`), job `105344717103`, completed successfully on 2026-09-17 for commit `6c5868e2f7e0b0f2462401b40d70bf483e8c8492`. The publish job successfully built and pushed the image, attached the digest-bound GitHub attestation, verified that attestation, and verified both OCI SBOM and provenance metadata.
 
-M7.5 defines stable promotion and rollback in `docs/RELEASES.md`. Stable semantic tags are created only at already-qualified commits; immutable OCI digests remain the authoritative artifact identity; existing semantic tags are never moved during rollback; recovery selects a previously qualified digest/version and fixes are published as a new semantic version. M7.5 remains pending until the documentation change passes the normal CI and publication/verification path.
+M7.5 defines stable promotion and rollback in `docs/RELEASES.md`. Stable semantic tags are created only at already-qualified commits; immutable OCI digests remain the authoritative artifact identity; existing semantic tags are never moved during rollback; recovery selects a previously qualified digest/version and fixes are published as a new semantic version.
+
+M7.5 qualification evidence: GitHub Actions CI run #82 (`35264756176`), job `105349117600`, and Publish OCI image run #41 (`35264756212`), job `105349118107`, completed successfully on 2026-09-17 for commit `ee2417ef5e23d4ccded22485e899f73254e299f1`. The complete regression and CPU qualification suite passed, followed by successful OCI publication, digest-bound attestation verification, and OCI SBOM/provenance verification. M7 is therefore fully qualified.
 
 M7 portability rule: SBOM and OCI provenance are image-level standards and remain useful to Forgejo/self-hosted consumers. GitHub's hosted attestation service is additional publication metadata, not a requirement for building or consuming the image outside GitHub.
+
+## M8 — Consumer adoption and stable operations
+
+Status: **PLANNED**
+
+- M8.1 define a machine-readable consumer contract for Ploos-AS Amiga repositories
+- M8.2 provide a migration/qualification template for consumers moving to the qualified `amiga-dev` image
+- M8.3 validate the contract with representative real Ploos-AS Amiga projects
+- M8.4 document coordinated `amiga-dev` + `amiga-runtime` usage for compile/link versus runtime qualification
+- M8.5 define upgrade waves and compatibility reporting for organization-wide adoption
+
+M8 must preserve the provider-neutral OCI contract: GitHub Actions and Forgejo Actions are orchestration layers, while the qualified image and its commands remain the reusable development interface.
 
 ## Non-goals / legal boundary
 
