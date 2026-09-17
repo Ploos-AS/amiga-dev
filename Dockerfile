@@ -13,7 +13,9 @@ RUN apt-get update \
       autoconf automake bison build-essential ca-certificates cmake curl flex \
       git libgmp-dev libmpc-dev libmpfr-dev libncurses-dev make ninja-build \
       python3 rsync texinfo wget xz-utils \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /opt/amiga/share/amiga-dev \
+ && dpkg-query -W -f='${Package}\t${Version}\n' | LC_ALL=C sort > /opt/amiga/share/amiga-dev/toolchain-debian-packages.lock
 
 COPY toolchain/bebbo.lock /tmp/bebbo.lock
 COPY toolchain/build-inputs.lock /tmp/build-inputs.lock
@@ -41,7 +43,6 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
       done < /tmp/build-inputs.lock; \
     }; \
     verify_available_inputs \
- && mkdir -p /opt/amiga/share/amiga-dev \
  && cp /tmp/bebbo.lock /opt/amiga/share/amiga-dev/bebbo.lock \
  && cp /tmp/build-inputs.lock /opt/amiga/share/amiga-dev/build-inputs.lock \
  && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
@@ -85,13 +86,17 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
 FROM ${DEBIAN_BASE}
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG AMITOOLS_VERSION=0.8.1
+COPY python/requirements.lock /tmp/requirements.lock
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       binutils build-essential ca-certificates cmake curl default-jre-headless file git jlha-utils jq make ninja-build \
       pkg-config python3 python3-pip python3-venv rsync unzip wget xxd xz-utils zip \
  && rm -rf /var/lib/apt/lists/* \
- && python3 -m pip install --no-cache-dir --break-system-packages "amitools==${AMITOOLS_VERSION}"
+ && mkdir -p /opt/amiga/share/amiga-dev \
+ && dpkg-query -W -f='${Package}\t${Version}\n' | LC_ALL=C sort > /opt/amiga/share/amiga-dev/runtime-debian-packages.lock \
+ && python3 -m pip install --no-cache-dir --break-system-packages --requirement /tmp/requirements.lock \
+ && python3 -m pip freeze --all | LC_ALL=C sort > /opt/amiga/share/amiga-dev/python-packages.lock \
+ && rm -f /tmp/requirements.lock
 
 COPY --from=toolchain /opt/amiga /opt/amiga
 
@@ -114,6 +119,9 @@ ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
 ENV AMIGA_TOOLCHAIN_MANIFEST=/opt/amiga/share/amiga-dev/toolchain.manifest
 ENV AMIGA_BUILD_INPUTS_MANIFEST=/opt/amiga/share/amiga-dev/build-inputs.manifest
+ENV AMIGA_RUNTIME_DEBIAN_PACKAGES=/opt/amiga/share/amiga-dev/runtime-debian-packages.lock
+ENV AMIGA_TOOLCHAIN_DEBIAN_PACKAGES=/opt/amiga/share/amiga-dev/toolchain-debian-packages.lock
+ENV AMIGA_PYTHON_PACKAGES=/opt/amiga/share/amiga-dev/python-packages.lock
 ENV PATH="/opt/amiga/bin:${PATH}"
 WORKDIR /workspace
 USER amiga
