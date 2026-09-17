@@ -1,0 +1,29 @@
+name: Amiga build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  amiga-build:
+    runs-on: docker
+    env:
+      AMIGA_DEV_IMAGE: ghcr.io/ploos-as/amiga-dev:edge
+      AMIGA_CPU_PROFILE: "68000"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull amiga-dev
+        run: docker pull "$AMIGA_DEV_IMAGE"
+      - name: Verify amiga-dev contract
+        run: docker run --rm "$AMIGA_DEV_IMAGE" amiga-check
+      - name: Build project
+        run: |
+          docker run --rm \
+            -e AMIGA_CPU_PROFILE="$AMIGA_CPU_PROFILE" \
+            -v "$PWD:/workspace" \
+            "$AMIGA_DEV_IMAGE" \
+            amiga-build make check
+
+# Adjust runs-on to the label configured by the local Forgejo Actions runner.
+# Replace :edge with a qualified immutable sha-* tag, semantic release, or digest
+# before using this workflow as a reproducible release qualification boundary.
