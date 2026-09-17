@@ -14,7 +14,7 @@ WORKDIR /tmp
 RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
  && make update \
- && make -j"$(nproc)" min PREFIX=/opt/amiga
+ && make -j"$(nproc)" all PREFIX=/opt/amiga
 
 FROM debian:bookworm-slim
 
