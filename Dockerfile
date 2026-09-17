@@ -32,7 +32,7 @@ ARG AMITOOLS_VERSION=0.8.1
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       binutils build-essential ca-certificates cmake curl file git jq make ninja-build \
-      pkg-config python3 python3-pip python3-venv rsync unzip vim-common wget xz-utils zip \
+      pkg-config python3 python3-pip python3-venv rsync unzip wget xxd xz-utils zip \
  && rm -rf /var/lib/apt/lists/* \
  && python3 -m pip install --no-cache-dir --break-system-packages "amitools==${AMITOOLS_VERSION}"
 
