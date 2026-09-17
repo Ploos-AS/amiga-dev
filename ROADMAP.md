@@ -62,7 +62,7 @@ Qualification evidence: GitHub Actions CI run #35 (`35225214509`) completed succ
 
 ## M4 — Packaging
 
-Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+Status: **QUALIFIED**
 
 - `amiga-package` provides one packaging entry point for staged release trees
 - normalize staged timestamps using `SOURCE_DATE_EPOCH` before archive construction
@@ -72,6 +72,8 @@ Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
 - SHA-256 sidecars for generated ZIP, LHA and ADF artifacts
 - sorted per-file SHA-256 release manifests
 - CI builds a real 68000 executable and qualifies manifest, ZIP, LHA and ADF outputs
+
+Qualification evidence: GitHub Actions CI run #40 (`35225713793`) completed successfully on 2026-09-17 for commit `cd066a2fe7f1ec3069cb814b2dc3e6089237fda4`. The full M1–M3 regression suite passed together with the M4 packaging qualification, including manifest, ZIP, LHA and ADF generation and verification.
 
 M4 packaging operates only on caller-provided redistributable staging trees; it does not add proprietary AmigaOS or Kickstart material.
 
