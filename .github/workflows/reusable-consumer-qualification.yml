@@ -1,0 +1,21 @@
+name: Reusable consumer qualification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/reusable-amiga-dev.yml'
+      - '.github/workflows/reusable-consumer-qualification.yml'
+      - 'docs/CONSUMER_CI.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  consumer:
+    uses: Ploos-AS/amiga-dev/.github/workflows/reusable-amiga-dev.yml@main
+    with:
+      image: ghcr.io/ploos-as/amiga-dev:edge
+      command: amiga-check && m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror tests/hello.c -o /tmp/consumer-hello && amiga-inspect /tmp/consumer-hello
