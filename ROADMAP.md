@@ -34,11 +34,16 @@ Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qual
 
 ## M2 — Amiga development utilities
 
-- vasm/vlink where useful and redistributable
-- amitools and host-side Hunk inspection
-- archive/package utilities
-- ADF/HDF helpers
-- binary inspection helpers
+Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+
+- retain vasm from the full Bebbo toolchain rather than installing a duplicate copy
+- install pinned `amitools` 0.8.1 for host-side Hunk and filesystem tooling
+- provide `hunktool`, `xdftool`, `xdfscan`, `rdbtool`, `romtool` and `fdtool`
+- provide host binary inspection helpers including `file`, `readelf` and `xxd`
+- retain ZIP/unzip and standard archive utilities
+- qualify the utility inventory in the normal container CI
+
+M2 intentionally does not install or embed proprietary Kickstart ROMs, Workbench media, AmigaOS installations, or commercial SDK material.
 
 ## M3 — Unified developer commands
 
