@@ -1,0 +1,4 @@
+# M7.3 host-side Python dependency lock.
+# Keep all direct Python packages explicit here; transitive versions are
+# captured in the built image's python-packages.lock and SBOM.
+amitools==0.8.1
