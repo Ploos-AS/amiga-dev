@@ -18,6 +18,11 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && test -n "${SDL_TIMER_FILE}" \
  && grep -Eq '^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;' "${SDL_TIMER_FILE}" \
  && sed -Ei '/^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;/d' "${SDL_TIMER_FILE}" \
+ && LIBNIX_PREPLIB="projects/libnix/preplib" \
+ && test -f "${LIBNIX_PREPLIB}" \
+ && test "$(grep -c -- '-not -name __vwfprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 1 \
+ && test "$(grep -c -- '-not -name __vfwprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 0 \
+ && sed -i 's/__vwfprintf_total_size\.o/__vfwprintf_total_size.o/' "${LIBNIX_PREPLIB}" \
  && make -j"$(nproc)" all PREFIX=/opt/amiga
 
 FROM debian:bookworm-slim
