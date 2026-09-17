@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 1 ]; then
+  echo "usage: amiga-inspect FILE" >&2
+  exit 2
+fi
+
+file=$1
+test -f "$file" || { echo "amiga-inspect: not a file: $file" >&2; exit 2; }
+
+file "$file"
+echo "--- hunktool ---"
+if ! hunktool "$file"; then
+  echo "amiga-inspect: hunktool could not decode this file" >&2
+fi
+
+echo "--- first 64 bytes ---"
+xxd -l 64 "$file"
