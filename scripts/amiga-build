@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+profile="${AMIGA_CPU_PROFILE:-68000}"
+case "$profile" in
+  68000) cpu_flags="-m68000" ;;
+  *) echo "amiga-build: unsupported CPU profile: $profile" >&2; exit 2 ;;
+esac
+
+export AMIGA_CPU_PROFILE="$profile"
+export AMIGA_CPU_FLAGS="$cpu_flags"
+
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
+if [ -f Makefile ] || [ -f makefile ]; then
+  exec make
+fi
+
+echo "amiga-build: no command supplied and no Makefile found" >&2
+exit 2
