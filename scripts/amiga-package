@@ -1,0 +1,59 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  echo "usage: amiga-package FORMAT SOURCE OUTPUT [VOLUME]" >&2
+  echo "formats: zip lha adf manifest" >&2
+  exit 2
+}
+
+[ "$#" -ge 3 ] && [ "$#" -le 4 ] || usage
+format=$1
+source=$2
+output=$3
+volume=${4:-Release}
+epoch=${SOURCE_DATE_EPOCH:-946684800}
+
+[ -d "$source" ] || { echo "amiga-package: source is not a directory: $source" >&2; exit 2; }
+mkdir -p "$(dirname "$output")"
+
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT HUP INT TERM
+cp -a "$source"/. "$stage"/
+find "$stage" -exec touch -h -d "@$epoch" {} +
+
+manifest() {
+  (cd "$stage" && find . -type f -print | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done)
+}
+
+case "$format" in
+  manifest)
+    manifest > "$output"
+    ;;
+  zip)
+    rm -f "$output"
+    out_abs=$(cd "$(dirname "$output")" && pwd)/$(basename "$output")
+    (cd "$stage" && find . -type f -print | LC_ALL=C sort | zip -X -q "$out_abs" -@)
+    ;;
+  lha)
+    command -v lha >/dev/null || { echo "amiga-package: lha archiver unavailable" >&2; exit 2; }
+    rm -f "$output"
+    out_abs=$(cd "$(dirname "$output")" && pwd)/$(basename "$output")
+    (cd "$stage" && find . -type f -print | LC_ALL=C sort | xargs lha a "$out_abs")
+    ;;
+  adf)
+    rm -f "$output"
+    xdftool "$output" create
+    xdftool "$output" format "$volume" ffs
+    xdftool "$output" pack "$stage"
+    xdfscan "$output"
+    ;;
+  *) usage ;;
+esac
+
+case "$format" in
+  manifest) : ;;
+  *) sha256sum "$output" > "$output.sha256" ;;
+esac
+
+echo "amiga-package: $format: $output"
