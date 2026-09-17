@@ -1,0 +1,43 @@
+name: GHCR consumer smoke
+
+on:
+  workflow_run:
+    workflows: ['Publish OCI image']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull published image
+        run: docker pull ghcr.io/ploos-as/amiga-dev:edge
+
+      - name: Run published-image smoke test
+        run: docker run --rm ghcr.io/ploos-as/amiga-dev:edge amiga-dev-smoke
+
+      - name: Verify published compiler target
+        run: docker run --rm ghcr.io/ploos-as/amiga-dev:edge m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
+
+      - name: Verify published developer contract
+        run: |
+          docker run --rm ghcr.io/ploos-as/amiga-dev:edge sh -ec '
+            command -v amiga-build
+            command -v amiga-check
+            command -v amiga-test
+            command -v amiga-inspect
+            command -v amiga-package
+            amiga-check
+          '
