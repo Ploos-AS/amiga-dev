@@ -23,25 +23,25 @@ jobs:
         with:
           context: .
           load: true
-          tags: amiga-dev:m2
+          tags: amiga-dev:m3
           cache-from: type=gha,scope=amiga-dev-full
           cache-to: type=gha,mode=max,scope=amiga-dev-full
       - name: Run baseline smoke test
-        run: docker run --rm amiga-dev:m2 amiga-dev-smoke
+        run: docker run --rm amiga-dev:m3 amiga-dev-smoke
       - name: Report toolchain
-        run: docker run --rm amiga-dev:m2 amiga-toolchain-info
+        run: docker run --rm amiga-dev:m3 amiga-toolchain-info
       - name: Compile minimal 68000 executable
         run: |
           docker run --rm \
             -v "$PWD:/workspace" \
-            amiga-dev:m2 \
+            amiga-dev:m3 \
             m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror \
               tests/hello.c -o /tmp/hello-amiga
       - name: Verify compiler target
-        run: docker run --rm amiga-dev:m2 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
+        run: docker run --rm amiga-dev:m3 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
       - name: Verify M2 Amiga utilities
         run: |
-          docker run --rm amiga-dev:m2 sh -ec '
+          docker run --rm amiga-dev:m3 sh -ec '
             command -v vasmm68k_mot
             command -v hunktool
             command -v xdftool
@@ -53,3 +53,19 @@ jobs:
             command -v readelf
             python3 -c "import amitools; print(amitools.__file__)"
           '
+      - name: Verify M3 command inventory
+        run: |
+          docker run --rm amiga-dev:m3 sh -ec '
+            command -v amiga-build
+            command -v amiga-check
+            command -v amiga-test
+            command -v amiga-inspect
+            test "$AMIGA_CPU_PROFILE" = 68000
+            amiga-check
+          '
+      - name: Verify M3 68000 build profile
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            amiga-dev:m3 \
+            amiga-build sh -ec 'm68k-amigaos-gcc $AMIGA_CPU_FLAGS -Os -Wall -Wextra -Werror tests/hello.c -o /tmp/hello-m3 && amiga-inspect /tmp/hello-m3'
