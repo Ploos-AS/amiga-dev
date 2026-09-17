@@ -27,12 +27,16 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
       git -C "${repo}" checkout --detach "${commit}"; \
       test "$(git -C "${repo}" rev-parse HEAD)" = "${commit}"; \
     done < /tmp/bebbo.lock \
- && while IFS="$(printf '\t')" read -r input expected; do \
-      case "${input}" in ''|'#'*) continue ;; esac; \
-      test -f "${input}"; \
-      actual="$(sha256sum "${input}" | awk '{print $1}')"; \
-      test "${actual}" = "${expected}"; \
-    done < /tmp/build-inputs.lock \
+ && verify_available_inputs() { \
+      while IFS="$(printf '\t')" read -r input expected; do \
+        case "${input}" in ''|'#'*) continue ;; esac; \
+        if [ -f "${input}" ]; then \
+          actual="$(sha256sum "${input}" | awk '{print $1}')"; \
+          test "${actual}" = "${expected}"; \
+        fi; \
+      done < /tmp/build-inputs.lock; \
+    }; \
+    verify_available_inputs \
  && mkdir -p /opt/amiga/share/amiga-dev \
  && cp /tmp/bebbo.lock /opt/amiga/share/amiga-dev/bebbo.lock \
  && cp /tmp/build-inputs.lock /opt/amiga/share/amiga-dev/build-inputs.lock \
@@ -46,6 +50,12 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && test "$(grep -c -- '-not -name __vfwprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 0 \
  && sed -i 's/__vwfprintf_total_size\.o/__vfwprintf_total_size.o/' "${LIBNIX_PREPLIB}" \
  && make -j"$(nproc)" all PREFIX=/opt/amiga \
+ && while IFS="$(printf '\t')" read -r input expected; do \
+      case "${input}" in ''|'#'*) continue ;; esac; \
+      test -f "${input}"; \
+      actual="$(sha256sum "${input}" | awk '{print $1}')"; \
+      test "${actual}" = "${expected}"; \
+    done < /tmp/build-inputs.lock \
  && test "$(git -C projects/vasm config --get remote.origin.url)" = "https://github.com/mheyer32/vasm" \
  && test "$(git -C projects/vasm rev-parse HEAD)" = "bb048d9d3cf54d5e38c643182a0ff55b552f65be" \
  && { \
