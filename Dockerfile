@@ -1,7 +1,8 @@
 FROM debian:bookworm-slim AS toolchain
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG AMIGA_GCC_REF=master
+ARG AMIGA_GCC_REPO=https://github.com/erique/amiga-gcc.git
+ARG AMIGA_GCC_REF=devel1-snapshot
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -11,9 +12,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-RUN git clone --depth 1 --branch "${AMIGA_GCC_REF}" https://github.com/bebbo/amiga-gcc.git \
+RUN git clone --depth 1 --branch "${AMIGA_GCC_REF}" "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
- && git submodule update --init --recursive \
  && make update \
  && make -j"$(nproc)" all PREFIX=/opt/amiga
 
