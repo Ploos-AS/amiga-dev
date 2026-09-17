@@ -28,9 +28,9 @@ Status: **QUALIFIED**
 
 Qualification evidence: GitHub Actions CI run #18 (`35215431305`) completed successfully on 2026-09-17 for commit `34bf552e4ec1ea586195c7b1acaa0d0239cb104c`. The full image build, baseline smoke test, toolchain report, minimal 68000 compile/link probe and compiler-target verification all passed.
 
-Caching policy: the full Bebbo build is intentionally retained. CI should reuse BuildKit layers whenever the Dockerfile/toolchain inputs are unchanged. GitHub may use its native BuildKit cache backend as provider-specific glue; Forgejo/local builds remain free to use a registry or local BuildKit cache. Consumer projects should ultimately consume a qualified prebuilt `amiga-dev` image instead of rebuilding the toolchain for every project run.
+Caching policy: the full Bebbo build is intentionally retained. CI should reuse BuildKit layers whenever the Dockerfile/toolchain inputs are unchanged. GitHub may use its native BuildKit cache backend as provider-specific glue; Forgejo/local builds remain free to use a registry or local BuildKit cache. Consumer projects should consume a qualified prebuilt `amiga-dev` image instead of rebuilding the toolchain for every project run.
 
-Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qualified upstream revision. A floating upstream ref is acceptable during bring-up but must be replaced by an immutable qualified revision before a stable image release.
+The current M1 build follows Bebbo upstream at build time. Immutable upstream selection and complete transitive toolchain provenance are M6 requirements; earlier documentation incorrectly claimed an `AMIGA_GCC_REF` build argument already existed.
 
 ## M2 — Amiga development utilities
 
@@ -79,7 +79,7 @@ M4 packaging operates only on caller-provided redistributable staging trees; it 
 
 ## M5 — CI integration
 
-Status: **IN PROGRESS — M5.1 QUALIFIED, M5.2 IMPLEMENTED**
+Status: **QUALIFIED**
 
 - publish versioned OCI images
 - GHCR integration: `ghcr.io/ploos-as/amiga-dev`
@@ -89,18 +89,27 @@ Status: **IN PROGRESS — M5.1 QUALIFIED, M5.2 IMPLEMENTED**
 - reusable GitHub Actions workflow with configurable image and consumer command
 - provider-neutral Docker/OCI consumer contract documented for GitHub and Forgejo/self-hosted runners
 - consumer-project qualification
-- registry-backed BuildKit cache usable by Forgejo/self-hosted runners
+- registry-backed BuildKit cache at `ghcr.io/ploos-as/amiga-dev:buildcache` for Forgejo/self-hosted runners
 
-M5.1 qualification evidence: publish run `35226848474` completed successfully on 2026-09-17 for commit `ecfd191b99c5176a18c068d13bd13f9b408ec99b`. The resulting `ghcr.io/ploos-as/amiga-dev:edge` image was then pulled by an independent consumer-smoke workflow, run `35226911972`, where `amiga-dev-smoke`, compiler-target verification, the unified developer-command inventory and `amiga-check` all passed.
+M5.1 qualification evidence: publish run `35226848474` completed successfully on 2026-09-17 for commit `ecfd191b99c5176a18c068d13bd13f9b408ec99b`. The resulting `ghcr.io/ploos-as/amiga-dev:edge` image was then pulled by independent consumer-smoke run `35226911972`; smoke, compiler target, developer command inventory and `amiga-check` passed.
 
-M5.2 provides `.github/workflows/reusable-amiga-dev.yml` and `docs/CONSUMER_CI.md`. Qualification requires exercising the reusable workflow as a consumer before M5.2 is marked qualified.
+M5.2 qualification evidence: reusable consumer run `35227661381` completed successfully on 2026-09-17 for commit `8c18a80e8e660da13b89a7a2b3a55edeae45f2f7`. It invoked the reusable workflow, consumed the published image, ran `amiga-check`, compiled a real `-m68000` executable and inspected the result. Follow-up GHCR consumer smoke `35227698015` also passed.
+
+M5.3 qualification evidence: registry-backed BuildKit cache publishing was added to the OCI publication path, with Forgejo/self-hosted usage documented in `docs/FORGEJO_CACHE.md`. Subsequent GHCR consumer smoke run `35235352901` completed successfully on 2026-09-17, confirming normal published-image consumption remained healthy after the cache integration.
 
 ## M6 — Reproducibility and qualification
 
-- pinned toolchain manifests
-- provenance/version reporting
+Status: **IN PROGRESS — M6.1 STARTED**
+
+- immutable top-level Bebbo/amiga-gcc revision selection
+- capture the top-level Bebbo commit used by every image
+- capture transitive repository revisions populated by Bebbo `make update`
+- install a machine-readable toolchain manifest in the image
+- expose provenance through `amiga-toolchain-info`
 - image qualification matrix
 - compatibility policy
+
+M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and reported.
 
 ## Non-goals / legal boundary
 
