@@ -131,6 +131,21 @@ M6.5 qualification evidence: GitHub Actions CI run #70 (`35254387772`) completed
 
 M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets are covered by M6.3. Toolchain or dependency upgrades must follow `docs/COMPATIBILITY.md` and pass the complete qualification suite before stable promotion.
 
+## M7 — Supply-chain and release hardening
+
+Status: **IN PROGRESS — M7.1 STARTED**
+
+- M7.1 publish OCI SBOM and build provenance alongside each published image
+- M7.1 attach GitHub artifact attestation to the exact published image digest
+- M7.2 pin the Debian base image by digest and document the controlled refresh procedure
+- M7.3 tighten host package/Python dependency reproducibility where practical
+- M7.4 verify published attestations and SBOM as part of release qualification
+- M7.5 document stable release promotion and rollback procedure
+
+M7.1 enables BuildKit SBOM generation and maximum provenance for the GHCR publication build. The publish workflow captures the pushed image digest and uses GitHub's build-provenance attestation flow with OIDC, binding the attestation to `ghcr.io/ploos-as/amiga-dev` at that exact digest. M7.1 remains pending until the updated publish workflow completes successfully.
+
+M7 portability rule: SBOM and OCI provenance are image-level standards and remain useful to Forgejo/self-hosted consumers. GitHub's hosted attestation service is additional publication metadata, not a requirement for building or consuming the image outside GitHub.
+
 ## Non-goals / legal boundary
 
 The repository and published images do not distribute Kickstart ROMs, Workbench media, commercial AmigaOS installations, license keys, or other proprietary artifacts that cannot legally be redistributed.
