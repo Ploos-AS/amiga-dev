@@ -2,6 +2,7 @@
 set -eu
 
 manifest="${AMIGA_TOOLCHAIN_MANIFEST:-/opt/amiga/share/amiga-dev/toolchain.manifest}"
+inputs="${AMIGA_BUILD_INPUTS_MANIFEST:-/opt/amiga/share/amiga-dev/build-inputs.manifest}"
 
 printf '%s\n' 'amiga-dev toolchain'
 printf 'prefix: %s\n' "${AMIGA_PREFIX:-/opt/amiga}"
@@ -14,5 +15,13 @@ if [ -r "${manifest}" ]; then
   cat "${manifest}"
 else
   printf 'manifest: unavailable (%s)\n' "${manifest}"
+  exit 1
+fi
+
+printf '\n%s\n' 'downloaded build inputs:'
+if [ -r "${inputs}" ]; then
+  cat "${inputs}"
+else
+  printf 'build inputs manifest: unavailable (%s)\n' "${inputs}"
   exit 1
 fi
