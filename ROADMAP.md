@@ -62,10 +62,18 @@ Qualification evidence: GitHub Actions CI run #35 (`35225214509`) completed succ
 
 ## M4 — Packaging
 
-- reproducible release staging
-- LHA/ZIP packaging
-- optional ADF construction
-- checksums and manifests
+Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+
+- `amiga-package` provides one packaging entry point for staged release trees
+- normalize staged timestamps using `SOURCE_DATE_EPOCH` before archive construction
+- deterministic-path ZIP packaging with metadata stripping
+- LHA packaging through the Debian `jlha-utils` compatible `lha` command
+- optional FFS ADF construction using `xdftool`, followed by `xdfscan` verification
+- SHA-256 sidecars for generated ZIP, LHA and ADF artifacts
+- sorted per-file SHA-256 release manifests
+- CI builds a real 68000 executable and qualifies manifest, ZIP, LHA and ADF outputs
+
+M4 packaging operates only on caller-provided redistributable staging trees; it does not add proprietary AmigaOS or Kickstart material.
 
 ## M5 — CI integration
 
