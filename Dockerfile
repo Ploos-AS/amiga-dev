@@ -2,7 +2,7 @@ FROM debian:bookworm-slim AS toolchain
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AMIGA_GCC_REPO=https://franke.ms/git/bebbo/amiga-gcc
-ARG AMIGA_GCC_REF=master
+ARG AMIGA_GCC_REF=926bf10f1ff0bb0e72d99d49b69b22828988761c
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -11,11 +11,19 @@ RUN apt-get update \
       python3 rsync texinfo wget xz-utils \
  && rm -rf /var/lib/apt/lists/*
 
+COPY toolchain/bebbo.lock /tmp/bebbo.lock
 WORKDIR /tmp
 RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
  && git checkout --detach "${AMIGA_GCC_REF}" \
  && make update \
+ && while IFS="$(printf '\t')" read -r repo commit origin; do \
+      case "${repo}" in ''|'#'*) continue ;; esac; \
+      test -d "${repo}"; \
+      test "$(git -C "${repo}" config --get remote.origin.url)" = "${origin}"; \
+      git -C "${repo}" checkout --detach "${commit}"; \
+      test "$(git -C "${repo}" rev-parse HEAD)" = "${commit}"; \
+    done < /tmp/bebbo.lock \
  && mkdir -p /opt/amiga/share/amiga-dev \
  && { \
       printf 'schema=1\n'; \
@@ -29,6 +37,7 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
         printf 'repo=%s\tcommit=%s\torigin=%s\n' "${repo#./}" "${commit}" "${origin}"; \
       done; \
     } > /opt/amiga/share/amiga-dev/toolchain.manifest \
+ && cp /tmp/bebbo.lock /opt/amiga/share/amiga-dev/bebbo.lock \
  && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
  && test -n "${SDL_TIMER_FILE}" \
  && grep -Eq '^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;' "${SDL_TIMER_FILE}" \
