@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
+if [ -f Makefile ] || [ -f makefile ]; then
+  exec make check
+fi
+
+echo "amiga-test: no test command supplied and no Makefile found" >&2
+echo "amiga-test: runtime/emulator execution belongs in amiga-runtime" >&2
+exit 2
