@@ -99,7 +99,7 @@ M5.3 qualification evidence: registry-backed BuildKit cache publishing was added
 
 ## M6 — Reproducibility and qualification
 
-Status: **IN PROGRESS — M6.1 QUALIFIED, M6.2 STARTED**
+Status: **IN PROGRESS — M6.1/M6.2 QUALIFIED, M6.3 STARTED**
 
 - immutable top-level Bebbo/amiga-gcc revision selection
 - capture the top-level Bebbo commit used by every image
@@ -107,14 +107,19 @@ Status: **IN PROGRESS — M6.1 QUALIFIED, M6.2 STARTED**
 - install a machine-readable toolchain manifest in the image
 - expose provenance through `amiga-toolchain-info`
 - lock qualified transitive repository revisions before building
+- lock or checksum remaining later-stage Git/download build inputs
 - image qualification matrix
 - compatibility policy
 
 M6.1 qualification evidence: GitHub Actions CI run #53 (`35237303095`) completed successfully on 2026-09-17 for commit `c8cb609fb625755427c10bd97fb9d2461af2f914`. The image reported manifest schema 1, resolved Bebbo/amiga-gcc commit `926bf10f1ff0bb0e72d99d49b69b22828988761c`, and the revisions/origins of the Git repositories populated by the update stage through `amiga-toolchain-info`; all M1–M4 regression probes passed.
 
-M6.2 pins the default top-level Bebbo revision to `926bf10f1ff0bb0e72d99d49b69b22828988761c` and records the qualified update-stage repositories in `toolchain/bebbo.lock`. The container build verifies each locked origin, checks out its exact commit after `make update`, verifies the resulting HEAD, and installs the lock alongside the generated provenance manifest. M6.2 remains pending qualification until the resulting CI build passes.
+M6.2 pins the default top-level Bebbo revision to `926bf10f1ff0bb0e72d99d49b69b22828988761c` and records the qualified update-stage repositories in `toolchain/bebbo.lock`. The container build verifies each locked origin, checks out its exact commit after `make update`, verifies the resulting HEAD, and installs the lock alongside the generated provenance manifest.
 
-M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets remain candidates for a subsequent reproducibility hardening step before declaring M6 complete.
+M6.2 qualification evidence: GitHub Actions CI run #56 (`35240713777`) completed successfully on 2026-09-17 for commit `09910edcdd61459b4011f9810db25a3c9527a45d`, job `105268122297`. The locked full image build completed successfully and the baseline smoke test, toolchain/provenance report, minimal 68000 compile, compiler-target verification, M2 utility inventory, M3 developer commands/build profile, and M4 packaging regression probes all passed.
+
+M6.3 closes the remaining reproducibility gap by inventorying repositories cloned only during later `make all` targets and downloaded non-Git inputs, then pinning revisions or recording and verifying immutable checksums as appropriate. The resulting provenance must cover every network-derived build input required for the qualified toolchain before M6 can be declared complete.
+
+M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets must be covered by M6.3 before declaring M6 complete.
 
 ## Non-goals / legal boundary
 
