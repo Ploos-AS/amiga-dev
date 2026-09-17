@@ -31,7 +31,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG AMITOOLS_VERSION=0.8.1
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      binutils build-essential ca-certificates cmake curl file git jq make ninja-build \
+      binutils build-essential ca-certificates cmake curl default-jre-headless file git jlha-utils jq make ninja-build \
       pkg-config python3 python3-pip python3-venv rsync unzip wget xxd xz-utils zip \
  && rm -rf /var/lib/apt/lists/* \
  && python3 -m pip install --no-cache-dir --break-system-packages "amitools==${AMITOOLS_VERSION}"
@@ -48,9 +48,10 @@ COPY scripts/amiga-build /usr/local/bin/amiga-build
 COPY scripts/amiga-check /usr/local/bin/amiga-check
 COPY scripts/amiga-test /usr/local/bin/amiga-test
 COPY scripts/amiga-inspect /usr/local/bin/amiga-inspect
+COPY scripts/amiga-package /usr/local/bin/amiga-package
 RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-info \
       /usr/local/bin/amiga-build /usr/local/bin/amiga-check \
-      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect
+      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect /usr/local/bin/amiga-package
 
 ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
