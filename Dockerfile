@@ -14,6 +14,10 @@ WORKDIR /tmp
 RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
  && make update \
+ && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
+ && test -n "${SDL_TIMER_FILE}" \
+ && grep -Eq '^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;' "${SDL_TIMER_FILE}" \
+ && sed -Ei '/^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;/d' "${SDL_TIMER_FILE}" \
  && make -j"$(nproc)" all PREFIX=/opt/amiga
 
 FROM debian:bookworm-slim
