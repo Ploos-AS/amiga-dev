@@ -79,18 +79,21 @@ M4 packaging operates only on caller-provided redistributable staging trees; it 
 
 ## M5 — CI integration
 
-Status: **IN PROGRESS — M5.1 GHCR PUBLISHING IMPLEMENTED**
+Status: **IN PROGRESS — M5.1 QUALIFIED, M5.2 IMPLEMENTED**
 
 - publish versioned OCI images
 - GHCR integration: `ghcr.io/ploos-as/amiga-dev`
 - default-branch pushes publish `edge` plus immutable `sha-*` tags
 - `v*` tags publish semantic-version tags
 - publishing reuses the qualified BuildKit cache and uses only the repository-scoped `GITHUB_TOKEN`
-- reusable GitHub Actions examples
+- reusable GitHub Actions workflow with configurable image and consumer command
+- provider-neutral Docker/OCI consumer contract documented for GitHub and Forgejo/self-hosted runners
 - consumer-project qualification
 - registry-backed BuildKit cache usable by Forgejo/self-hosted runners
 
-M5.1 qualification requires a successful publish workflow and a pull/smoke test of the resulting GHCR image before it is marked qualified.
+M5.1 qualification evidence: publish run `35226848474` completed successfully on 2026-09-17 for commit `ecfd191b99c5176a18c068d13bd13f9b408ec99b`. The resulting `ghcr.io/ploos-as/amiga-dev:edge` image was then pulled by an independent consumer-smoke workflow, run `35226911972`, where `amiga-dev-smoke`, compiler-target verification, the unified developer-command inventory and `amiga-check` all passed.
+
+M5.2 provides `.github/workflows/reusable-amiga-dev.yml` and `docs/CONSUMER_CI.md`. Qualification requires exercising the reusable workflow as a consumer before M5.2 is marked qualified.
 
 ## M6 — Reproducibility and qualification
 
