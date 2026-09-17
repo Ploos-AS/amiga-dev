@@ -23,49 +23,54 @@ jobs:
         with:
           context: .
           load: true
-          tags: amiga-dev:m3
+          tags: amiga-dev:m4
           cache-from: type=gha,scope=amiga-dev-full
           cache-to: type=gha,mode=max,scope=amiga-dev-full
       - name: Run baseline smoke test
-        run: docker run --rm amiga-dev:m3 amiga-dev-smoke
+        run: docker run --rm amiga-dev:m4 amiga-dev-smoke
       - name: Report toolchain
-        run: docker run --rm amiga-dev:m3 amiga-toolchain-info
+        run: docker run --rm amiga-dev:m4 amiga-toolchain-info
       - name: Compile minimal 68000 executable
         run: |
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            amiga-dev:m3 \
-            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror \
-              tests/hello.c -o /tmp/hello-amiga
+          docker run --rm -v "$PWD:/workspace" amiga-dev:m4 \
+            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror tests/hello.c -o /tmp/hello-amiga
       - name: Verify compiler target
-        run: docker run --rm amiga-dev:m3 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
+        run: docker run --rm amiga-dev:m4 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
       - name: Verify M2 Amiga utilities
         run: |
-          docker run --rm amiga-dev:m3 sh -ec '
-            command -v vasmm68k_mot
-            command -v hunktool
-            command -v xdftool
-            command -v xdfscan
-            command -v rdbtool
-            command -v romtool
-            command -v fdtool
-            command -v xxd
-            command -v readelf
+          docker run --rm amiga-dev:m4 sh -ec '
+            command -v vasmm68k_mot; command -v hunktool; command -v xdftool; command -v xdfscan
+            command -v rdbtool; command -v romtool; command -v fdtool; command -v xxd; command -v readelf
             python3 -c "import amitools; print(amitools.__file__)"
           '
-      - name: Verify M3 command inventory
+      - name: Verify M3 developer commands
         run: |
-          docker run --rm amiga-dev:m3 sh -ec '
-            command -v amiga-build
-            command -v amiga-check
-            command -v amiga-test
-            command -v amiga-inspect
-            test "$AMIGA_CPU_PROFILE" = 68000
-            amiga-check
+          docker run --rm amiga-dev:m4 sh -ec '
+            command -v amiga-build; command -v amiga-check; command -v amiga-test; command -v amiga-inspect
+            test "$AMIGA_CPU_PROFILE" = 68000; amiga-check
           '
       - name: Verify M3 68000 build profile
         run: |
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            amiga-dev:m3 \
+          docker run --rm -v "$PWD:/workspace" amiga-dev:m4 \
             amiga-build sh -ec 'm68k-amigaos-gcc $AMIGA_CPU_FLAGS -Os -Wall -Wextra -Werror tests/hello.c -o /tmp/hello-m3 && amiga-inspect /tmp/hello-m3'
+      - name: Verify M4 packaging
+        run: |
+          docker run --rm -v "$PWD:/workspace" amiga-dev:m4 sh -ec '
+            command -v amiga-package
+            command -v lha
+            rm -rf /tmp/m4 && mkdir -p /tmp/m4/stage /tmp/m4/out
+            m68k-amigaos-gcc -m68000 -Os tests/hello.c -o /tmp/m4/stage/hello
+            cp README.md /tmp/m4/stage/README.md
+            export SOURCE_DATE_EPOCH=946684800
+            amiga-package manifest /tmp/m4/stage /tmp/m4/out/MANIFEST.sha256
+            amiga-package zip /tmp/m4/stage /tmp/m4/out/release.zip
+            amiga-package lha /tmp/m4/stage /tmp/m4/out/release.lha
+            amiga-package adf /tmp/m4/stage /tmp/m4/out/release.adf M4Test
+            test -s /tmp/m4/out/MANIFEST.sha256
+            test -s /tmp/m4/out/release.zip.sha256
+            test -s /tmp/m4/out/release.lha.sha256
+            test -s /tmp/m4/out/release.adf.sha256
+            unzip -t /tmp/m4/out/release.zip
+            lha t /tmp/m4/out/release.lha
+            xdfscan /tmp/m4/out/release.adf
+          '
