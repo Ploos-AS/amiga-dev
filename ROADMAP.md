@@ -99,7 +99,7 @@ M5.3 qualification evidence: registry-backed BuildKit cache publishing was added
 
 ## M6 — Reproducibility and qualification
 
-Status: **IN PROGRESS — M6.1/M6.2/M6.3 QUALIFIED, M6.4 STARTED**
+Status: **IN PROGRESS — M6.1/M6.2/M6.3/M6.4 QUALIFIED, M6.5 STARTED**
 
 - immutable top-level Bebbo/amiga-gcc revision selection
 - capture the top-level Bebbo commit used by every image
@@ -121,9 +121,13 @@ M6.3 closes the remaining toolchain-input reproducibility gap. Later-stage Git i
 
 M6.3 qualification evidence: GitHub Actions CI run #64 (`35249502087`) completed successfully on 2026-09-17 for commit `36fa632a00243323e33f0b029571ec180ee05ab1`, job `105298049622`. The locked full Bebbo build completed successfully, all recorded downloaded build inputs passed SHA-256 verification, the later-stage vasm revision matched its pinned commit, and the baseline smoke, toolchain/provenance report, minimal 68000 compile, compiler-target verification, M2 utility inventory, M3 developer commands/build profile, and M4 packaging regression probes all passed.
 
-M6.4 defines an explicit image qualification matrix in `docs/M6_4_QUALIFICATION_MATRIX.md`. CI now compile/links and inspects representative executables for 68000, 68020, 68030, 68040 and 68060 against the same fully built image, in addition to the existing M1–M4 regression contract. Runtime execution remains the responsibility of `amiga-runtime`. M6.4 remains pending until this matrix completes successfully in CI.
+M6.4 defines the explicit image qualification matrix in `docs/M6_4_QUALIFICATION_MATRIX.md`. CI compile/links and inspects representative executables for 68000, 68020, 68030, 68040 and 68060 against the same fully built image, in addition to the existing M1–M4 regression contract. Runtime execution remains the responsibility of `amiga-runtime`.
 
-M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets are covered by M6.3. The remaining M6 work is qualification of the image matrix and the compatibility policy before M6 can be declared complete.
+M6.4 qualification evidence: GitHub Actions CI run #68 (`35253840041`) completed successfully on 2026-09-17 for commit `27614ab0f60dd08ad4eeeb576131799d76edc123`, job `105312668829`. The full image build and all existing regression probes passed, followed by successful compile/link and inspection for every M6.4 CPU profile: 68000, 68020, 68030, 68040 and 68060.
+
+M6.5 defines the compatibility and upgrade contract in `docs/COMPATIBILITY.md`: the 68000 default baseline, qualified later CPU profiles, separation of development and runtime qualification, immutable/stable image consumption guidance, provider-neutral OCI behaviour, semantic-version compatibility expectations, and deliberate requalification of toolchain/dependency upgrades. M6.5 is implemented and pending final CI confirmation before M6 is declared complete.
+
+M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets are covered by M6.3. M6 can be declared complete after the compatibility-policy change passes the complete qualified CI suite.
 
 ## Non-goals / legal boundary
 
