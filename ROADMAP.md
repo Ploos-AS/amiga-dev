@@ -30,7 +30,7 @@ Qualification evidence: GitHub Actions CI run #18 (`35215431305`) completed succ
 
 Caching policy: the full Bebbo build is intentionally retained. CI should reuse BuildKit layers whenever the Dockerfile/toolchain inputs are unchanged. GitHub may use its native BuildKit cache backend as provider-specific glue; Forgejo/local builds remain free to use a registry or local BuildKit cache. Consumer projects should consume a qualified prebuilt `amiga-dev` image instead of rebuilding the toolchain for every project run.
 
-The current M1 build follows Bebbo upstream at build time. Immutable upstream selection and complete transitive toolchain provenance are M6 requirements; earlier documentation incorrectly claimed an `AMIGA_GCC_REF` build argument already existed.
+The historical M1 build followed Bebbo upstream at build time. Immutable selection is introduced by M6.
 
 ## M2 — Amiga development utilities
 
@@ -99,17 +99,22 @@ M5.3 qualification evidence: registry-backed BuildKit cache publishing was added
 
 ## M6 — Reproducibility and qualification
 
-Status: **IN PROGRESS — M6.1 STARTED**
+Status: **IN PROGRESS — M6.1 QUALIFIED, M6.2 STARTED**
 
 - immutable top-level Bebbo/amiga-gcc revision selection
 - capture the top-level Bebbo commit used by every image
 - capture transitive repository revisions populated by Bebbo `make update`
 - install a machine-readable toolchain manifest in the image
 - expose provenance through `amiga-toolchain-info`
+- lock qualified transitive repository revisions before building
 - image qualification matrix
 - compatibility policy
 
-M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and reported.
+M6.1 qualification evidence: GitHub Actions CI run #53 (`35237303095`) completed successfully on 2026-09-17 for commit `c8cb609fb625755427c10bd97fb9d2461af2f914`. The image reported manifest schema 1, resolved Bebbo/amiga-gcc commit `926bf10f1ff0bb0e72d99d49b69b22828988761c`, and the revisions/origins of the Git repositories populated by the update stage through `amiga-toolchain-info`; all M1–M4 regression probes passed.
+
+M6.2 pins the default top-level Bebbo revision to `926bf10f1ff0bb0e72d99d49b69b22828988761c` and records the qualified update-stage repositories in `toolchain/bebbo.lock`. The container build verifies each locked origin, checks out its exact commit after `make update`, verifies the resulting HEAD, and installs the lock alongside the generated provenance manifest. M6.2 remains pending qualification until the resulting CI build passes.
+
+M6 stable-release rule: a stable image must not depend on an unrecorded floating toolchain state. Pinning only the top-level Bebbo repository is insufficient unless the revisions fetched by its update process are also captured and locked. Downloaded non-Git inputs and repositories cloned only during later build targets remain candidates for a subsequent reproducibility hardening step before declaring M6 complete.
 
 ## Non-goals / legal boundary
 
