@@ -1,4 +1,8 @@
-FROM debian:bookworm-slim AS toolchain
+# M7.2: keep both stages on the same qualified Debian snapshot.
+# Refresh only through the documented base-image qualification procedure.
+ARG DEBIAN_BASE=debian:bookworm-20260824-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
+
+FROM ${DEBIAN_BASE} AS toolchain
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AMIGA_GCC_REPO=https://franke.ms/git/bebbo/amiga-gcc
@@ -78,7 +82,7 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
       done < /tmp/build-inputs.lock; \
     } > /opt/amiga/share/amiga-dev/build-inputs.manifest
 
-FROM debian:bookworm-slim
+FROM ${DEBIAN_BASE}
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AMITOOLS_VERSION=0.8.1
