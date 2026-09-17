@@ -12,8 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build amiga-dev image
-        run: docker build --tag amiga-dev:m1 .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build amiga-dev image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: amiga-dev:m1
+          cache-from: type=gha,scope=amiga-dev-full
+          cache-to: type=gha,mode=max,scope=amiga-dev-full
       - name: Run baseline smoke test
         run: docker run --rm amiga-dev:m1 amiga-dev-smoke
       - name: Report toolchain
