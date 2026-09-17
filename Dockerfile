@@ -12,6 +12,9 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY toolchain/bebbo.lock /tmp/bebbo.lock
+COPY toolchain/build-inputs.lock /tmp/build-inputs.lock
+COPY toolchain/git-locked /usr/local/bin/git
+RUN chmod 0755 /usr/local/bin/git
 WORKDIR /tmp
 RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && cd amiga-gcc \
@@ -24,8 +27,15 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
       git -C "${repo}" checkout --detach "${commit}"; \
       test "$(git -C "${repo}" rev-parse HEAD)" = "${commit}"; \
     done < /tmp/bebbo.lock \
+ && while IFS="$(printf '\t')" read -r input expected; do \
+      case "${input}" in ''|'#'*) continue ;; esac; \
+      test -f "${input}"; \
+      actual="$(sha256sum "${input}" | awk '{print $1}')"; \
+      test "${actual}" = "${expected}"; \
+    done < /tmp/build-inputs.lock \
  && mkdir -p /opt/amiga/share/amiga-dev \
  && cp /tmp/bebbo.lock /opt/amiga/share/amiga-dev/bebbo.lock \
+ && cp /tmp/build-inputs.lock /opt/amiga/share/amiga-dev/build-inputs.lock \
  && SDL_TIMER_FILE="$(find . -type f -path '*/timer/amigaos/SDL_systimer.c' -print -quit)" \
  && test -n "${SDL_TIMER_FILE}" \
  && grep -Eq '^[[:space:]]*struct[[:space:]]+Library[[:space:]]*\*[[:space:]]*TimerBase[[:space:]]*;' "${SDL_TIMER_FILE}" \
@@ -36,6 +46,8 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
  && test "$(grep -c -- '-not -name __vfwprintf_total_size.o' "${LIBNIX_PREPLIB}")" -eq 0 \
  && sed -i 's/__vwfprintf_total_size\.o/__vfwprintf_total_size.o/' "${LIBNIX_PREPLIB}" \
  && make -j"$(nproc)" all PREFIX=/opt/amiga \
+ && test "$(git -C projects/vasm config --get remote.origin.url)" = "https://github.com/mheyer32/vasm" \
+ && test "$(git -C projects/vasm rev-parse HEAD)" = "bb048d9d3cf54d5e38c643182a0ff55b552f65be" \
  && { \
       printf 'schema=2\n'; \
       printf 'amiga_gcc_repo=%s\n' "${AMIGA_GCC_REPO}"; \
@@ -50,10 +62,10 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
     } > /opt/amiga/share/amiga-dev/toolchain.manifest \
  && { \
       printf 'schema=1\n'; \
-      find . -type f \( -name '*.lha' -o -name '*.tar.gz' -o -name '*.tar.xz' -o -name '*.tgz' -o -name '*.zip' \) -print | sort | while IFS= read -r input; do \
-        set -- $(sha256sum "${input}"); \
-        printf 'file=%s\tsha256=%s\n' "${input#./}" "$1"; \
-      done; \
+      while IFS="$(printf '\t')" read -r input expected; do \
+        case "${input}" in ''|'#'*) continue ;; esac; \
+        printf 'file=%s\tsha256=%s\n' "${input}" "${expected}"; \
+      done < /tmp/build-inputs.lock; \
     } > /opt/amiga/share/amiga-dev/build-inputs.manifest
 
 FROM debian:bookworm-slim
