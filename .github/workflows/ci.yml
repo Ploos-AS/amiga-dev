@@ -42,6 +42,23 @@ jobs:
             .redistribution.commercial_amigaos == false and
             .redistribution.license_keys == false
           ' consumer-contract.json >/dev/null
+      - name: Verify M8.2 consumer migration templates
+        run: |
+          set -eu
+          for template in templates/consumer/amiga-dev-consumer.yml templates/consumer/forgejo-amiga-dev-consumer.yml; do
+            test -s "$template"
+            grep -Fq 'ghcr.io/ploos-as/amiga-dev:edge' "$template"
+            grep -Fq 'AMIGA_CPU_PROFILE: "68000"' "$template"
+            grep -Fq 'amiga-check' "$template"
+            grep -Fq 'amiga-build make check' "$template"
+            grep -Fq 'docker run --rm' "$template"
+            grep -Fq 'qualified immutable sha-* tag' "$template"
+          done
+          grep -Fq 'runs-on: ubuntu-latest' templates/consumer/amiga-dev-consumer.yml
+          grep -Fq 'runs-on: docker' templates/consumer/forgejo-amiga-dev-consumer.yml
+          test -s docs/M8_2_CONSUMER_MIGRATION.md
+          grep -Fq 'amiga-runtime' docs/M8_2_CONSUMER_MIGRATION.md
+          grep -Fq 'm68k-amigaos' docs/M8_2_CONSUMER_MIGRATION.md
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build amiga-dev image with cache
