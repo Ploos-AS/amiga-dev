@@ -49,11 +49,14 @@ M2 intentionally does not install or embed proprietary Kickstart ROMs, Workbench
 
 ## M3 — Unified developer commands
 
-- `amiga-build`
-- `amiga-check`
-- `amiga-test`
-- `amiga-inspect`
-- CPU profiles beginning with 68000
+Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+
+- `amiga-build` provides a common build entry point and exports CPU-profile flags
+- `amiga-check` validates the container/toolchain contract
+- `amiga-test` provides a common host-side test entry point; emulator/runtime execution remains delegated to `amiga-runtime`
+- `amiga-inspect` combines host file identification, Hunk inspection and a bounded hex preview
+- CPU profiles begin with the portable `68000` baseline (`AMIGA_CPU_PROFILE=68000`, `AMIGA_CPU_FLAGS=-m68000`)
+- CI qualifies the command inventory and uses `amiga-build` plus `amiga-inspect` on a real cross-compiled executable
 
 ## M4 — Packaging
 
