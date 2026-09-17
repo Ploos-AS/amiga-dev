@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "ploos-amiga-dev-consumer",
+  "image": "ghcr.io/ploos-as/amiga-dev",
+  "recommended_channel": "qualified",
+  "reproducible_reference": "digest-or-sha-tag",
+  "default_cpu_profile": "68000",
+  "cpu_profiles": ["68000", "68020", "68030", "68040", "68060"],
+  "commands": {
+    "build": "amiga-build",
+    "check": "amiga-check",
+    "test": "amiga-test",
+    "inspect": "amiga-inspect",
+    "package": "amiga-package",
+    "toolchain_info": "amiga-toolchain-info"
+  },
+  "target": "m68k-amigaos",
+  "runtime_qualification": {
+    "delegated_to": "Ploos-AS/amiga-runtime",
+    "required_for_runtime_claims": true
+  },
+  "ci": {
+    "github_actions": true,
+    "forgejo_actions": true,
+    "provider_neutral_oci_contract": true
+  },
+  "redistribution": {
+    "proprietary_kickstart": false,
+    "proprietary_workbench": false,
+    "commercial_amigaos": false,
+    "license_keys": false
+  }
+}
