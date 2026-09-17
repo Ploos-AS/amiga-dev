@@ -1,0 +1,16 @@
+# amiga-dev Bebbo downloaded build-input lock
+# Qualified inventory from CI run 35245168377 on 2026-09-17.
+# Format: repository-relative path<TAB>sha256
+# Only network-derived files under download/ are included; archives already
+# tracked inside pinned source repositories are intentionally excluded.
+download/CGraphX-DevKit.lha	dd2610649a692863dc27bbce595520b0ee269a03e03f73a8858396127df0fb0c
+download/NDK3.2.lha	96cabd4ad683dced632e147bf86dee0f50dcb1254386216c25c362916a6409bb
+download/SDL_mixer-SDL-1.2.tar.gz	674453c3df09ddcd198ac3084e273211c372f3954ee7a770deb11ae64fd14c97
+download/SDL_ttf-SDL-1.2.tar.gz	cea0e7419cb29f91969d4f6288f0fe98ebd67dea2217b17e11d82dc2b4c3c8b6
+download/freetype-2.12.1.tar.xz	4766f20157cc4cf0cd292f80bf917f92d1c439b243ac3018debf6b9140c41a7f
+download/ixemul-sdk.lha	00b4054283b99d22f6b353194fa8c75917ec0cc08a3a64395a891da446db07fc
+download/libpng-1.6.39.tar.xz	1f4696ce70b4ee5f85f1e1623dc1229b210029fa4b7aee573df3e2ba7b036937
+download/m68k-amigaos-ahidev.lha	de3571879210ad9ca179fbbc7a8c0591dfd0b673d6785657d8796fc1d7a147ec
+download/vbcc_target_m68k-amigaos.lha	ec734d7115359cdb5d1c70349284ecbd5712ef47e8bc28d4150117c6f8c73289
+download/vbcc_target_m68k-kick13.lha	8815948604eb50ec8b82d4fd2c9d673f5ec59a6623778edfcb29a7df608ea711
+download/zlib-1.3.2.tar.xz	d7a0654783a4da529d1bb793b7ad9c3318020af77667bcae35f95d0e42a792f3
