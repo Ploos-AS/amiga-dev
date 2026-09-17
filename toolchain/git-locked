@@ -8,7 +8,8 @@ real_git=/usr/bin/git
 # clone returns, before make can compile or install anything from that checkout.
 case " $* " in
   *" clone https://github.com/mheyer32/vasm "*)
-    dest="${@: -1}"
+    dest=
+    for arg do dest="${arg}"; done
     case "${dest}" in
       https://*) dest=vasm ;;
     esac
