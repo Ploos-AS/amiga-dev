@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+real_git=/usr/bin/git
+"${real_git}" "$@"
+
+# Bebbo clones vasm only during the later full build. Pin it immediately after
+# clone returns, before make can compile or install anything from that checkout.
+case " $* " in
+  *" clone https://github.com/mheyer32/vasm "*)
+    dest="${@: -1}"
+    case "${dest}" in
+      https://*) dest=vasm ;;
+    esac
+    "${real_git}" -C "${dest}" checkout --detach bb048d9d3cf54d5e38c643182a0ff55b552f65be
+    test "$("${real_git}" -C "${dest}" rev-parse HEAD)" = bb048d9d3cf54d5e38c643182a0ff55b552f65be
+    ;;
+esac
