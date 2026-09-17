@@ -34,7 +34,7 @@ Note: the build accepts `AMIGA_GCC_REF` so the toolchain can be pinned to a qual
 
 ## M2 — Amiga development utilities
 
-Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
+Status: **QUALIFIED**
 
 - retain vasm from the full Bebbo toolchain rather than installing a duplicate copy
 - install pinned `amitools` 0.8.1 for host-side Hunk and filesystem tooling
@@ -42,6 +42,8 @@ Status: **IMPLEMENTED — CI QUALIFICATION PENDING**
 - provide host binary inspection helpers including `file`, `readelf` and `xxd`
 - retain ZIP/unzip and standard archive utilities
 - qualify the utility inventory in the normal container CI
+
+Qualification evidence: GitHub Actions CI run #27 (`35221347045`) completed successfully on 2026-09-17 for commit `0a8d4a5081b8e0b3c1dc861f0187867548755ab6`. The full cached container build, M1 regression probes and the M2 utility inventory all passed, including `vasmm68k_mot`, `hunktool`, `xdftool`, `xdfscan`, `rdbtool`, `romtool`, `fdtool`, `xxd`, `readelf` and the pinned `amitools` Python package.
 
 M2 intentionally does not install or embed proprietary Kickstart ROMs, Workbench media, AmigaOS installations, or commercial SDK material.
 
