@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: amiga-dev-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   container:
     runs-on: ubuntu-latest
