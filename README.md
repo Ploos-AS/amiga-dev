@@ -4,43 +4,34 @@ Reproducible OCI development environment for classic Amiga software projects.
 
 `amiga-dev` provides Ploos-AS projects with one shared, versioned environment for host-side checks, cross compilation, packaging, and qualification helpers.
 
-## M0 scope
+## Current status
 
-M0 establishes the repository and container foundation:
+M0 container foundation and M1 Bebbo/amiga-gcc toolchain are qualified. M1 qualification passed in GitHub Actions CI run #18 (`35215431305`) on 2026-09-17 using the full Bebbo `make all` build, followed by smoke, toolchain, minimal 68000 compile/link and target-verification probes.
 
-- Debian-based OCI image
-- common build and inspection utilities
-- non-root development user
-- `/workspace` working directory
-- explicit Bebbo/amiga-gcc toolchain boundary
-- smoke-test tooling
-- GitHub Actions container-build validation
-- no Kickstart ROMs, Workbench media, or other proprietary AmigaOS files
-
-M0 does **not** claim that the Bebbo toolchain is installed or qualified yet. That is M1.
+The expensive full toolchain build is deliberately retained. GitHub CI uses BuildKit layer caching so unchanged toolchain layers can be reused. This caching is provider-specific acceleration only; the image and command contract remain usable with ordinary Docker/Podman and Forgejo Actions. The longer-term CI model is for consumer projects to pull a qualified prebuilt `amiga-dev` image rather than rebuild Bebbo for every project.
 
 ## Build
 
 ```sh
-docker build -t amiga-dev:m0 .
+docker build -t amiga-dev:m1 .
 ```
 
 or:
 
 ```sh
-podman build -t amiga-dev:m0 .
+podman build -t amiga-dev:m1 .
 ```
 
 ## Smoke test
 
 ```sh
-docker run --rm amiga-dev:m0 amiga-dev-smoke
+docker run --rm amiga-dev:m1 amiga-dev-smoke
 ```
 
 ## Interactive use
 
 ```sh
-docker run --rm -it -v "$PWD:/workspace" amiga-dev:m0
+docker run --rm -it -v "$PWD:/workspace" amiga-dev:m1
 ```
 
 ## Toolchain policy
@@ -49,7 +40,7 @@ Only software and SDK material whose licenses permit redistribution may be embed
 
 Runtime qualification requiring user-owned system files must receive them externally at runtime.
 
-See [ROADMAP.md](ROADMAP.md) for planned milestones.
+See [ROADMAP.md](ROADMAP.md) for planned milestones and [docs/CI_PORTABILITY.md](docs/CI_PORTABILITY.md) for the GitHub/Forgejo/local portability contract.
 
 ## License
 
