@@ -1,0 +1,43 @@
+name: Reusable amiga-dev build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Qualified amiga-dev OCI image
+        required: false
+        type: string
+        default: ghcr.io/ploos-as/amiga-dev:edge
+      command:
+        description: Command to execute inside /workspace
+        required: false
+        type: string
+        default: amiga-check
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  amiga-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull qualified amiga-dev image
+        run: docker pull "${{ inputs.image }}"
+      - name: Run consumer command
+        env:
+          AMIGA_DEV_IMAGE: ${{ inputs.image }}
+          AMIGA_DEV_COMMAND: ${{ inputs.command }}
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            "$AMIGA_DEV_IMAGE" \
+            sh -ec "$AMIGA_DEV_COMMAND"
