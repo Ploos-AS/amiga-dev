@@ -68,6 +68,12 @@ jobs:
           ' targets.json >/dev/null
           test -x scripts/amiga-targets
 
+      - name: Verify pinned AROS source
+        run: |
+          grep -Fx 'https://github.com/aros-development-team/AROS.git	d4a19031d68308c7e0821d8baf6ad99745382c5e' toolchain/aros.lock
+          test -x scripts/aros-toolchain-info
+          test -s docs/AROS_TOOLCHAIN.md
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build amiga-dev image with cache
@@ -99,7 +105,7 @@ jobs:
         run: |
           docker run --rm amiga-dev:m4 sh -ec '
             command -v amiga-build; command -v amiga-check; command -v amiga-test; command -v amiga-inspect
-            command -v amiga-targets
+            command -v amiga-targets; command -v aros-toolchain-info
             test "$AMIGA_CPU_PROFILE" = 68000
             test "$AMIGA_TARGET" = amigaos-m68k
             amiga-targets check amigaos-m68k
