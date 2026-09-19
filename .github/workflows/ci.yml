@@ -71,8 +71,9 @@ jobs:
 
       - name: Verify pinned AROS source
         run: |
-          grep -Fx 'https://github.com/aros-development-team/AROS.git	d4a19031d68308c7e0821d8baf6ad99745382c5e' toolchain/aros.lock
-          test -x scripts/aros-toolchain-info
+          awk '$1 == "https://github.com/aros-development-team/AROS.git" && $2 == "d4a19031d68308c7e0821d8baf6ad99745382c5e" { ok=1 } END { exit(ok ? 0 : 1) }' toolchain/aros.lock
+          test -s scripts/aros-toolchain-info
+          head -n1 scripts/aros-toolchain-info | grep -Fx '#!/bin/sh'
           test -s docs/AROS_TOOLCHAIN.md
 
       - name: Set up Docker Buildx
