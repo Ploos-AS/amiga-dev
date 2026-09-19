@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "targets": [
+    {"id":"amigaos-m68k","os":"amigaos","arch":"m68k","class":"classic","status":"qualified","tool_prefix":"m68k-amigaos"},
+    {"id":"aros-m68k","os":"aros","arch":"m68k","class":"aros","status":"planned-toolchain","tool_prefix":"m68k-aros"},
+    {"id":"aros-x86_64","os":"aros","arch":"x86_64","class":"aros","status":"planned-toolchain","tool_prefix":"x86_64-aros"},
+    {"id":"aros-ppc","os":"aros","arch":"ppc","class":"aros","status":"planned-toolchain","tool_prefix":"powerpc-aros"},
+    {"id":"morphos-ppc","os":"morphos","arch":"ppc","class":"ng","status":"planned-toolchain","tool_prefix":"ppc-morphos"},
+    {"id":"amigaos4-ppc","os":"amigaos4","arch":"ppc","class":"ng","status":"planned-toolchain","tool_prefix":"ppc-amigaos"}
+  ]
+}
