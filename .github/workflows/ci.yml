@@ -64,7 +64,7 @@ jobs:
           jq -e '
             .schema == 1 and
             ([.targets[].id] == ["amigaos-m68k","aros-m68k","aros-x86_64","aros-ppc","morphos-ppc","amigaos4-ppc"]) and
-            ([.targets[] | select(.status == "qualified") | .id] == ["amigaos-m68k"])
+            ([.targets[] | select(.status == "qualified") | .id] == ["amigaos-m68k","aros-m68k"])
           ' targets.json >/dev/null
           test -s scripts/amiga-targets
           head -n1 scripts/amiga-targets | grep -Fx '#!/bin/sh'
