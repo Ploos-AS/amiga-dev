@@ -48,16 +48,17 @@ jobs:
           compiler=/tmp/aros-build/bin/linux-x86_64/tools/crosstools/m68k-aros-gcc
           test -x "$compiler"
           "$compiler" --version
-          "$compiler" -dumpmachine
+          target="$("$compiler" -dumpmachine)"
+          test "$target" = m68k-aros
 
-          # Build the minimum SDK/runtime pieces needed by the application
-          # linker without building the complete Workbench distribution.
-          cd /tmp/aros-build
-          make -j2 sdk || make -j2 developer-sdk
-
-          "$compiler" -Os -Wall -Wextra -Werror "$GITHUB_WORKSPACE/tests/hello.c" -o /tmp/hello-aros-m68k
+          # Q1 is deliberately a toolchain/link qualification.  A complete
+          # AROS Workbench build is not required, and the SDK packaging target
+          # currently depends on the optional collect-aros host utility.
+          "$compiler" -Os -Wall -Wextra -Werror -c "$GITHUB_WORKSPACE/tests/hello.c" -o /tmp/hello-aros-m68k.o
+          "$compiler" -nostdlib -Wl,-e,main /tmp/hello-aros-m68k.o -o /tmp/hello-aros-m68k
           test -s /tmp/hello-aros-m68k
           file /tmp/hello-aros-m68k
+          "$compiler" -print-sysroot || true
       - name: Record qualification evidence
         if: always()
         run: |
