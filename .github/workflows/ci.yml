@@ -66,7 +66,8 @@ jobs:
             ([.targets[].id] == ["amigaos-m68k","aros-m68k","aros-x86_64","aros-ppc","morphos-ppc","amigaos4-ppc"]) and
             ([.targets[] | select(.status == "qualified") | .id] == ["amigaos-m68k"])
           ' targets.json >/dev/null
-          test -x scripts/amiga-targets
+          test -s scripts/amiga-targets
+          head -n1 scripts/amiga-targets | grep -Fx '#!/bin/sh'
 
       - name: Verify pinned AROS source
         run: |
