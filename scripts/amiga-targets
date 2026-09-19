@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+manifest="${AMIGA_TARGETS_MANIFEST:-/opt/amiga/share/amiga-dev/targets.json}"
+case "${1:-list}" in
+  list) jq -r '.targets[] | [.id,.os,.arch,.status] | @tsv' "$manifest" ;;
+  json) cat "$manifest" ;;
+  check)
+    id=${2:?usage: amiga-targets check TARGET}
+    jq -e --arg id "$id" '.targets[] | select(.id == $id)' "$manifest" >/dev/null
+    ;;
+  *) echo "usage: amiga-targets [list|json|check TARGET]" >&2; exit 64 ;;
+esac
