@@ -27,3 +27,7 @@ For each architecture:
 5. only then promote the target status to `qualified`.
 
 Runtime qualification is delegated to Ploos-AS/amiga-runtime.
+
+## CI qualification policy
+
+The main container CI validates the pinned source provenance and target registry on every change. Architecture-specific AROS builds run in dedicated workflows because building a complete AROS SDK/toolchain is substantially heavier than the classic amiga-dev smoke suite.
