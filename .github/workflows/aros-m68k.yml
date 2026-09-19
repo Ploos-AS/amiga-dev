@@ -1,0 +1,63 @@
+name: AROS m68k qualification
+
+on:
+  push:
+    paths:
+      - '.github/workflows/aros-m68k.yml'
+      - 'toolchain/aros.lock'
+      - 'tests/hello.c'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install AROS build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y             autoconf automake bison build-essential byacc cmake flex gawk             git liblzo2-dev libpng-dev libx11-dev libxcursor-dev libxext-dev             libxxf86vm-dev netpbm python3-mako
+      - name: Checkout pinned AROS
+        run: |
+          set -eu
+          read -r repo commit < <(grep -v '^#' toolchain/aros.lock)
+          git clone --filter=blob:none "$repo" /tmp/aros-src
+          git -C /tmp/aros-src checkout --detach "$commit"
+          test "$(git -C /tmp/aros-src rev-parse HEAD)" = "$commit"
+      - name: Configure amiga-m68k
+        run: |
+          mkdir -p /tmp/aros-build
+          cd /tmp/aros-build
+          /tmp/aros-src/configure --target=amiga-m68k --with-serial-debug=yes
+      - name: Build AROS m68k toolchain and SDK
+        run: |
+          cd /tmp/aros-build
+          make -j2
+      - name: Discover and qualify compiler
+        run: |
+          set -eux
+          find /tmp/aros-build -type f \( -name '*-gcc' -o -name 'gcc' \) -print
+          compiler="$(find /tmp/aros-build -type f -name '*-gcc' -perm -111 | grep -E '/bin/.*m68k.*-gcc$' | head -n1 || true)"
+          test -n "$compiler"
+          "$compiler" --version
+          "$compiler" -dumpmachine
+          "$compiler" -Os -Wall -Wextra -Werror "$GITHUB_WORKSPACE/tests/hello.c" -o /tmp/hello-aros-m68k
+          test -s /tmp/hello-aros-m68k
+          file /tmp/hello-aros-m68k
+      - name: Record qualification evidence
+        if: always()
+        run: |
+          {
+            echo "AROS source: $(git -C /tmp/aros-src rev-parse HEAD 2>/dev/null || echo unavailable)"
+            echo "Build target: amiga-m68k"
+            find /tmp/aros-build -type f -name '*-gcc' -perm -111 -print 2>/dev/null || true
+          } > /tmp/aros-m68k-qualification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aros-m68k-qualification
+          path: /tmp/aros-m68k-qualification.txt
