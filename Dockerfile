@@ -111,12 +111,16 @@ COPY scripts/amiga-check /usr/local/bin/amiga-check
 COPY scripts/amiga-test /usr/local/bin/amiga-test
 COPY scripts/amiga-inspect /usr/local/bin/amiga-inspect
 COPY scripts/amiga-package /usr/local/bin/amiga-package
+COPY scripts/amiga-targets /usr/local/bin/amiga-targets
+COPY targets.json /opt/amiga/share/amiga-dev/targets.json
 RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-info \
       /usr/local/bin/amiga-build /usr/local/bin/amiga-check \
-      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect /usr/local/bin/amiga-package
+      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect /usr/local/bin/amiga-package /usr/local/bin/amiga-targets
 
 ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
+ENV AMIGA_TARGET=amigaos-m68k
+ENV AMIGA_TARGETS_MANIFEST=/opt/amiga/share/amiga-dev/targets.json
 ENV AMIGA_TOOLCHAIN_MANIFEST=/opt/amiga/share/amiga-dev/toolchain.manifest
 ENV AMIGA_BUILD_INPUTS_MANIFEST=/opt/amiga/share/amiga-dev/build-inputs.manifest
 ENV AMIGA_RUNTIME_DEBIAN_PACKAGES=/opt/amiga/share/amiga-dev/runtime-debian-packages.lock
