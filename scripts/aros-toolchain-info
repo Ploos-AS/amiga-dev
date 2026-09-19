@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+printf '%s\n' 'amiga-dev AROS toolchains'
+for target in m68k-aros x86_64-aros powerpc-aros; do
+  if command -v "$target-gcc" >/dev/null 2>&1; then
+    printf '%s: ' "$target"
+    "$target-gcc" -dumpmachine
+  else
+    printf '%s: unavailable\n' "$target"
+  fi
+done
