@@ -59,6 +59,15 @@ jobs:
           test -s docs/M8_2_CONSUMER_MIGRATION.md
           grep -Fq 'amiga-runtime' docs/M8_2_CONSUMER_MIGRATION.md
           grep -Fq 'm68k-amigaos' docs/M8_2_CONSUMER_MIGRATION.md
+      - name: Verify application target registry
+        run: |
+          jq -e '
+            .schema == 1 and
+            ([.targets[].id] == ["amigaos-m68k","aros-m68k","aros-x86_64","aros-ppc","morphos-ppc","amigaos4-ppc"]) and
+            ([.targets[] | select(.status == "qualified") | .id] == ["amigaos-m68k"])
+          ' targets.json >/dev/null
+          test -x scripts/amiga-targets
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build amiga-dev image with cache
@@ -90,7 +99,13 @@ jobs:
         run: |
           docker run --rm amiga-dev:m4 sh -ec '
             command -v amiga-build; command -v amiga-check; command -v amiga-test; command -v amiga-inspect
-            test "$AMIGA_CPU_PROFILE" = 68000; amiga-check
+            command -v amiga-targets
+            test "$AMIGA_CPU_PROFILE" = 68000
+            test "$AMIGA_TARGET" = amigaos-m68k
+            amiga-targets check amigaos-m68k
+            amiga-targets check aros-m68k
+            test "$(amiga-targets list | wc -l)" -eq 6
+            amiga-check
           '
       - name: Verify M3 68000 build profile
         run: |
