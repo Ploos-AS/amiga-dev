@@ -1,0 +1,67 @@
+name: AROS x86_64 qualification
+
+on:
+  push:
+    paths:
+      - '.github/workflows/aros-x86_64.yml'
+      - 'toolchain/aros.lock'
+      - 'tests/hello.c'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install AROS build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake bison build-essential byacc cmake flex gawk git             liblzo2-dev libpng-dev libx11-dev libxcursor-dev libxext-dev libxxf86vm-dev             netpbm python3-mako
+      - name: Checkout pinned AROS
+        run: |
+          set -eu
+          read -r repo commit < <(grep -v '^#' toolchain/aros.lock)
+          git clone --filter=blob:none "$repo" /tmp/aros-src
+          git -C /tmp/aros-src checkout --detach "$commit"
+          test "$(git -C /tmp/aros-src rev-parse HEAD)" = "$commit"
+      - name: Configure pc-x86_64
+        run: |
+          mkdir -p /tmp/aros-build
+          cd /tmp/aros-build
+          /tmp/aros-src/configure --target=pc-x86_64
+      - name: Build AROS x86_64 toolchain
+        run: |
+          set -eux
+          cd /tmp/aros-build
+          make -j2 tools-crosstools
+          test -x bin/linux-x86_64/tools/crosstools/x86_64-aros-gcc
+      - name: Discover and qualify compiler
+        run: |
+          set -eux
+          compiler=/tmp/aros-build/bin/linux-x86_64/tools/crosstools/x86_64-aros-gcc
+          test -x "$compiler"
+          "$compiler" --version
+          target="$("$compiler" -dumpmachine)"
+          test "$target" = x86_64-aros
+          "$compiler" -Os -Wall -Wextra -Werror -c "$GITHUB_WORKSPACE/tests/hello.c" -o /tmp/hello-aros-x86_64.o
+          "$compiler" -nostdlib -Wl,-e,main /tmp/hello-aros-x86_64.o -o /tmp/hello-aros-x86_64
+          test -s /tmp/hello-aros-x86_64
+          file /tmp/hello-aros-x86_64
+          "$compiler" -print-sysroot || true
+      - name: Record qualification evidence
+        if: always()
+        run: |
+          {
+            echo "AROS source: $(git -C /tmp/aros-src rev-parse HEAD 2>/dev/null || echo unavailable)"
+            echo "Build target: pc-x86_64"
+            find /tmp/aros-build -type f -name '*-gcc' -perm -111 -print 2>/dev/null || true
+          } > /tmp/aros-x86_64-qualification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aros-x86_64-qualification
+          path: /tmp/aros-x86_64-qualification.txt
