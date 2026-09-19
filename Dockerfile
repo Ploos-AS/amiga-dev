@@ -112,10 +112,12 @@ COPY scripts/amiga-test /usr/local/bin/amiga-test
 COPY scripts/amiga-inspect /usr/local/bin/amiga-inspect
 COPY scripts/amiga-package /usr/local/bin/amiga-package
 COPY scripts/amiga-targets /usr/local/bin/amiga-targets
+COPY scripts/aros-toolchain-info /usr/local/bin/aros-toolchain-info
+COPY toolchain/aros.lock /opt/amiga/share/amiga-dev/aros.lock
 COPY targets.json /opt/amiga/share/amiga-dev/targets.json
 RUN chmod 0755 /usr/local/bin/amiga-dev-smoke /usr/local/bin/amiga-toolchain-info \
       /usr/local/bin/amiga-build /usr/local/bin/amiga-check \
-      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect /usr/local/bin/amiga-package /usr/local/bin/amiga-targets
+      /usr/local/bin/amiga-test /usr/local/bin/amiga-inspect /usr/local/bin/amiga-package /usr/local/bin/amiga-targets /usr/local/bin/aros-toolchain-info
 
 ENV AMIGA_PREFIX=/opt/amiga
 ENV AMIGA_CPU_PROFILE=68000
