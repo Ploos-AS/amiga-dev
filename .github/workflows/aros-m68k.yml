@@ -33,18 +33,28 @@ jobs:
           mkdir -p /tmp/aros-build
           cd /tmp/aros-build
           /tmp/aros-src/configure --target=amiga-m68k --with-serial-debug=yes
-      - name: Build AROS m68k toolchain and SDK
+      - name: Build AROS m68k cross-toolchain and SDK prerequisites
         run: |
+          set -eux
           cd /tmp/aros-build
-          make -j2
+          # A complete AROS distribution build currently reaches unrelated
+          # Workbench/catalog generation.  For amiga-dev Q1 we only require
+          # the cross compiler and enough SDK state to compile/link an app.
+          make -j2 tools-crosstools
+          test -x bin/linux-x86_64/tools/crosstools/m68k-aros-gcc
       - name: Discover and qualify compiler
         run: |
           set -eux
-          find /tmp/aros-build -type f \( -name '*-gcc' -o -name 'gcc' \) -print
-          compiler="$(find /tmp/aros-build -type f -name '*-gcc' -perm -111 | grep -E '/bin/.*m68k.*-gcc$' | head -n1 || true)"
-          test -n "$compiler"
+          compiler=/tmp/aros-build/bin/linux-x86_64/tools/crosstools/m68k-aros-gcc
+          test -x "$compiler"
           "$compiler" --version
           "$compiler" -dumpmachine
+
+          # Build the minimum SDK/runtime pieces needed by the application
+          # linker without building the complete Workbench distribution.
+          cd /tmp/aros-build
+          make -j2 sdk || make -j2 developer-sdk
+
           "$compiler" -Os -Wall -Wextra -Werror "$GITHUB_WORKSPACE/tests/hello.c" -o /tmp/hello-aros-m68k
           test -s /tmp/hello-aros-m68k
           file /tmp/hello-aros-m68k
