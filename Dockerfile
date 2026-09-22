@@ -7,6 +7,8 @@ FROM ${DEBIAN_BASE} AS toolchain
 ARG DEBIAN_FRONTEND=noninteractive
 ARG AMIGA_GCC_REPO=https://franke.ms/git/bebbo/amiga-gcc
 ARG AMIGA_GCC_REF=926bf10f1ff0bb0e72d99d49b69b22828988761c
+ARG VLINK_REPO=https://github.com/8l/vlink
+ARG VLINK_REF=master
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -63,6 +65,12 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
     done < /tmp/build-inputs.lock \
  && test "$(git -C projects/vasm config --get remote.origin.url)" = "https://github.com/mheyer32/vasm" \
  && test "$(git -C projects/vasm rev-parse HEAD)" = "bb048d9d3cf54d5e38c643182a0ff55b552f65be" \
+ && git clone "${VLINK_REPO}" /tmp/vlink \
+ && git -C /tmp/vlink checkout --detach "${VLINK_REF}" \
+ && make -C /tmp/vlink \
+ && install -m 0755 /tmp/vlink/vlink /opt/amiga/bin/vlink \
+ && printf 'repo=vlink\tcommit=%s\torigin=%s\n' "$(git -C /tmp/vlink rev-parse HEAD)" "${VLINK_REPO}" > /opt/amiga/share/amiga-dev/vlink.manifest \
+ && /opt/amiga/bin/vlink -v >/dev/null \
  && { \
       printf 'schema=2\n'; \
       printf 'amiga_gcc_repo=%s\n' "${AMIGA_GCC_REPO}"; \
