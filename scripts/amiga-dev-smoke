@@ -3,7 +3,7 @@ set -eu
 
 printf '%s\n' 'amiga-dev M0 smoke test'
 
-for tool in cc make cmake ninja git python3 file jq; do
+for tool in cc make cmake ninja git python3 file jq vasmm68k_mot vlink; do
     command -v "$tool" >/dev/null 2>&1 || {
         echo "missing required host tool: $tool" >&2
         exit 1
