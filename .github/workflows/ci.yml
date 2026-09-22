@@ -99,7 +99,7 @@ jobs:
       - name: Verify M2 Amiga utilities
         run: |
           docker run --rm amiga-dev:m4 sh -ec '
-            command -v vasmm68k_mot; command -v hunktool; command -v xdftool; command -v xdfscan
+            command -v vasmm68k_mot; command -v vlink; vlink -v; command -v hunktool; command -v xdftool; command -v xdfscan
             command -v rdbtool; command -v romtool; command -v fdtool; command -v xxd; command -v readelf
             python3 -c "import amitools; print(amitools.__file__)"
           '
