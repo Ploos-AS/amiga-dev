@@ -95,6 +95,8 @@ RUN git clone "${AMIGA_GCC_REPO}" amiga-gcc \
 FROM ${DEBIAN_BASE}
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG AMISSL_VERSION=5.27
+ARG AMISSL_SDK_URL=https://github.com/jens-maus/amissl/releases/download/5.27/AmiSSL-5.27-SDK.lha
 COPY python/requirements.lock /tmp/requirements.lock
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -106,6 +108,15 @@ RUN apt-get update \
  && python3 -m pip install --no-cache-dir --break-system-packages --requirement /tmp/requirements.lock \
  && python3 -m pip freeze --all | LC_ALL=C sort > /opt/amiga/share/amiga-dev/python-packages.lock \
  && rm -f /tmp/requirements.lock
+RUN wget -q "${AMISSL_SDK_URL}" -O /tmp/AmiSSL-SDK.lha \
+ && mkdir -p /tmp/amissl-sdk /opt/amiga/AmiSSL \
+ && cd /tmp/amissl-sdk \
+ && lha xq /tmp/AmiSSL-SDK.lha \
+ && test -f AmiSSL/Developer/include/proto/amisslmaster.h \
+ && test -f AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+ && cp -a AmiSSL/Developer /opt/amiga/AmiSSL/ \
+ && printf 'version=%s\nsource=%s\n' "${AMISSL_VERSION}" "${AMISSL_SDK_URL}" > /opt/amiga/share/amiga-dev/amissl.manifest \
+ && rm -rf /tmp/amissl-sdk /tmp/AmiSSL-SDK.lha
 
 COPY --from=toolchain /opt/amiga /opt/amiga
 
