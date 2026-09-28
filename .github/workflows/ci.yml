@@ -94,6 +94,24 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/workspace" amiga-dev:m4 \
             m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror tests/hello.c -o /tmp/hello-amiga
+      - name: Compile stdio/file 68000 executable
+        run: |
+          docker run --rm amiga-dev:m4 sh -ec '
+            printf "%s\\n" \
+              "#include <stdio.h>" \
+              "int main(void) {" \
+              "  const char *a = \"T:amiga-dev-stdio.tmp\";" \
+              "  const char *b = \"T:amiga-dev-stdio-renamed.tmp\";" \
+              "  FILE *f = fopen(a, \"wb\");" \
+              "  if (!f) return 1;" \
+              "  if (fputs(\"probe\\n\", f) < 0) return 2;" \
+              "  if (fclose(f) != 0) return 3;" \
+              "  if (rename(a, b) != 0) return 4;" \
+              "  if (remove(b) != 0) return 5;" \
+              "  return 0;" \
+              "}" > /tmp/stdio-link.c
+            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror /tmp/stdio-link.c -o /tmp/stdio-link-amiga
+          '
       - name: Verify compiler target
         run: docker run --rm amiga-dev:m4 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
       - name: Verify M2 Amiga utilities
