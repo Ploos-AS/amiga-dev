@@ -110,7 +110,16 @@ jobs:
               "  if (remove(b) != 0) return 5;" \
               "  return 0;" \
               "}" > /tmp/stdio-link.c
-            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror /tmp/stdio-link.c -o /tmp/stdio-link-amiga
+            echo "=== default newlib link ==="
+            if m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror /tmp/stdio-link.c -o /tmp/stdio-link-newlib; then
+              echo "default newlib stdio link: PASS"
+            else
+              echo "default newlib stdio link: FAIL (diagnostic; checking libnix)"
+            fi
+            echo "=== libnix link ==="
+            m68k-amigaos-gcc -m68000 -Os -Wall -Wextra -Werror -noixemul /tmp/stdio-link.c -o /tmp/stdio-link-libnix
+            test -s /tmp/stdio-link-libnix
+            amiga-inspect /tmp/stdio-link-libnix
           '
       - name: Verify compiler target
         run: docker run --rm amiga-dev:m4 m68k-amigaos-gcc -dumpmachine | grep -Fx m68k-amigaos
