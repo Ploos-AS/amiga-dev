@@ -37,6 +37,8 @@ jobs:
           AMIGA_DEV_COMMAND: ${{ inputs.command }}
         run: |
           docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
             -v "$PWD:/workspace" \
             -w /workspace \
             "$AMIGA_DEV_IMAGE" \
