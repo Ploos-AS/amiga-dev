@@ -1,0 +1,54 @@
+name: Stable runtime consumer qualification
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build m68k consumer payload
+        run: |
+          mkdir -p runtime-payload
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            -v "$PWD:/workspace" -w /workspace \
+            ghcr.io/ploos-as/amiga-dev:sha-03a98b2 \
+            sh -ec 'm68k-amigaos-gcc -m68020 -Os -Wall -Wextra -Werror tests/hello.c -o runtime-payload/hello'
+          cat > runtime-payload/amiga-runtime.json <<'JSON'
+          {
+            "schema": 1,
+            "project": "Ploos-AS/amiga-dev",
+            "milestone": "stable-v1-consumer",
+            "architecture": "m68k",
+            "emulator_profiles": ["a1200-020-aros"],
+            "payload": {"kind": "program", "program": "hello"},
+            "result": {"logs": ["guest.log"], "required_lines": ["AMIGA_RUNTIME_PAYLOAD_OK"]},
+            "policy": {"roms_in_repository": false, "amigaos_files_in_repository": false}
+          }
+          JSON
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amiga-dev-runtime-payload
+          path: runtime-payload/
+          if-no-files-found: error
+
+  runtime:
+    needs: build
+    uses: Ploos-AS/amiga-runtime/.github/workflows/reusable-project-qualify.yml@main
+    with:
+      payload_artifact: amiga-dev-runtime-payload
+      profile: a1200-020-aros
+      runtime_image: ghcr.io/ploos-as/amiga-runtime:sha-46e30fa
