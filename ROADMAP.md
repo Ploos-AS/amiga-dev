@@ -210,3 +210,13 @@ M8 must preserve the provider-neutral OCI contract: GitHub Actions and Forgejo A
 ## Non-goals / legal boundary
 
 The repository and published images do not distribute Kickstart ROMs, Workbench media, commercial AmigaOS installations, license keys, or other proprietary artifacts that cannot legally be redistributed.
+
+## Stable runtime consumer checkpoint
+
+Status: **FROZEN / MAINTENANCE**
+
+The stable consumer path is qualified end-to-end against `Ploos-AS/amiga-runtime@v1`. A real Bebbo-built m68k/68020 Hunk payload is handed to the reusable runtime workflow, booted under the stable FS-UAE + AROS/m68k `a1200-020-aros` baseline, executed inside the guest, and accepted only with guest exit code 0 and `AMIGA_RUNTIME_PAYLOAD_OK` evidence.
+
+Qualification evidence: GitHub Actions run `37140935119` completed successfully for commit `cb8456e3c4995fb3b6f7d398acecb3b439364292` using the public stable workflow contract `Ploos-AS/amiga-runtime/.github/workflows/reusable-project-qualify.yml@v1` and an immutable runtime OCI image.
+
+This repository is now paused at the stable development/runtime consumer baseline. CI and publication remain active; the repository is not archived. Further M8 adoption work may resume deliberately without changing this qualified checkpoint.
