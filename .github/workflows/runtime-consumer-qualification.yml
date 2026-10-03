@@ -47,8 +47,8 @@ jobs:
 
   runtime:
     needs: build
-    uses: Ploos-AS/amiga-runtime/.github/workflows/reusable-project-qualify.yml@79222f1eaf9fffc5785ac4e04b7a8da3a7f178e3
+    uses: Ploos-AS/amiga-runtime/.github/workflows/reusable-project-qualify.yml@cad979bfcd364d45fe761c8b94e4a8c63c96e981
     with:
       payload_artifact: amiga-dev-runtime-payload
       profile: a1200-020-aros
-      runtime_image: ghcr.io/ploos-as/amiga-runtime:sha-79222f1
+      runtime_image: ghcr.io/ploos-as/amiga-runtime:sha-cad979b
